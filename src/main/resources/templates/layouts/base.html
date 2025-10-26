@@ -124,191 +124,273 @@
 	<!-- End Script -->
 	
 	<script th:inline="javascript">
-	        const carritoBaseUrl = /*[[@{/carrito}]]*/ '/carrito';
-	        // Variable global para evitar múltiples llamadas simultáneas
-	        let isCartActionRunning = false;
+	    const carritoBaseUrl = /*[[@{/carrito}]]*/ '/carrito';
+	    let isCartActionRunning = false;
+	    let originalCartItemValue = {}; // Para restaurar valor en caso de error
 
-	        // ----- FUNCIONES DE ACCIÓN -----
-	        function agregarAlCarrito(productoId) {
-	            ejecutarAccionCarrito(carritoBaseUrl + '/agregar/' + productoId, 'POST');
-	        }
+	    // ----- FUNCIONES DE ACCIÓN -----
+	    function agregarAlCarrito(productoId) {
+	        ejecutarAccionCarrito(carritoBaseUrl + '/agregar/' + productoId, 'POST');
+	    }
 
-	        function agregarDesdeDetalle(productoId) {
-	             const cantidadInput = document.getElementById('product-quanity');
-	             const cantidad = cantidadInput ? parseInt(cantidadInput.value) : 1;
-	             const formData = new URLSearchParams(); // Usar URLSearchParams para POST simple
-	             formData.append('cantidad', cantidad);
-	             ejecutarAccionCarrito(carritoBaseUrl + '/agregar/' + productoId, 'POST', formData);
-	        }
+	    function agregarDesdeDetalle() {
+	         const productoIdInput = document.getElementById('product-id-hidden');
+	         const cantidadInput = document.getElementById('product-quanity-visible');
+	         if (!productoIdInput || !cantidadInput) {
+	             console.error("IDs 'product-id-hidden' o 'product-quanity-visible' no encontrados.");
+	             mostrarNotificacion('Error al obtener datos del producto.', 'error');
+	             return;
+	         }
+	         const productoId = productoIdInput.value;
+	         const cantidad = parseInt(cantidadInput.value);
 
-	        function eliminarItem(productoId) {
+	         if (isNaN(cantidad) || cantidad < 1) {
+	             mostrarNotificacion('Cantidad inválida.', 'error');
+	             return;
+	         }
+
+	         const formData = new URLSearchParams();
+	         formData.append('cantidad', cantidad);
+	         ejecutarAccionCarrito(carritoBaseUrl + '/agregar/' + productoId, 'POST', formData);
+	    }
+
+	    function eliminarItem(productoId) {
+	         // Usar SweetAlert2 para confirmación (opcional pero recomendado)
+	         // if (typeof Swal !== 'undefined') {
+	         //     Swal.fire({
+	         //         title: '¿Eliminar producto?',
+	         //         text: "¿Estás seguro de que quieres eliminar este producto del carrito?",
+	         //         icon: 'warning',
+	         //         showCancelButton: true,
+	         //         confirmButtonColor: '#d33',
+	         //         cancelButtonColor: '#6c757d',
+	         //         confirmButtonText: 'Sí, eliminar',
+	         //         cancelButtonText: 'Cancelar'
+	         //     }).then((result) => {
+	         //         if (result.isConfirmed) {
+	         //             ejecutarAccionCarrito(carritoBaseUrl + '/eliminar/' + productoId, 'POST');
+	         //         }
+	         //     });
+	         // } else { // Fallback a confirm simple
 	             if (confirm('¿Eliminar este producto del carrito?')) {
 	                  ejecutarAccionCarrito(carritoBaseUrl + '/eliminar/' + productoId, 'POST');
 	             }
-	        }
+	         //}
+	    }
 
-	        function actualizarCantidad(inputElement) {
-	             const productoId = inputElement.getAttribute('data-product-id');
-	             const cantidad = parseInt(inputElement.value);
+	    function actualizarCantidad(inputElement) {
+	         const productoId = inputElement.getAttribute('data-product-id');
+	         let cantidad = parseInt(inputElement.value);
+	         const stockMax = parseInt(inputElement.max || '999'); // Leer el max del input
+	         const stockMin = parseInt(inputElement.min || '1');
 
-	             if (isNaN(cantidad) || cantidad < 0) {
-	                  // Restaurar valor anterior o simplemente no hacer nada y recargar
-	                  console.warn("Cantidad inválida.");
-	                  inputElement.value = inputElement.defaultValue; // Restaura si guardaste el default
-	                  // Opcional: mostrar error brevemente
-	                  return;
-	             }
-	             if (cantidad === 0) {
-	                 eliminarItem(productoId);
-	                 return;
-	             }
+	         // Corregir cantidad si está fuera de límites o es inválida
+	         if (isNaN(cantidad) || cantidad < stockMin) {
+	              cantidad = stockMin;
+	              inputElement.value = cantidad; // Corregir visualmente
+	              mostrarNotificacion(`La cantidad mínima es ${stockMin}.`, 'warning');
+	         }
+	         if (cantidad > stockMax) {
+	             cantidad = stockMax;
+	             inputElement.value = cantidad; // Corregir visualmente
+	             mostrarNotificacion(`Stock máximo (${stockMax}) alcanzado.`, 'warning');
+	         }
 
-	             const formData = new URLSearchParams();
-	             formData.append('cantidad', cantidad);
-	             ejecutarAccionCarrito(carritoBaseUrl + '/actualizar/' + productoId, 'POST', formData, inputElement);
-	        }
+	         // Si la cantidad original es la misma que la nueva (corregida), no hacer nada
+	         if (cantidad === parseInt(originalCartItemValue[productoId])) {
+	             console.log("Cantidad sin cambios para ID:", productoId);
+	             return;
+	         }
 
-	         function vaciarCarrito() {
+	         console.log(`Actualizando cantidad para ID ${productoId} a ${cantidad}`);
+	         const formData = new URLSearchParams();
+	         formData.append('cantidad', cantidad);
+	         ejecutarAccionCarrito(carritoBaseUrl + '/actualizar/' + productoId, 'POST', formData, inputElement);
+	    }
+
+	     function vaciarCarrito() {
+	         // Usar SweetAlert2 (opcional)
+	         // if (typeof Swal !== 'undefined') {
+	         //     Swal.fire({ title: '¿Vaciar carrito?', text: "¿Estás seguro?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#6c757d', confirmButtonText: 'Sí, vaciar', cancelButtonText: 'Cancelar'
+	         //     }).then((result) => { if (result.isConfirmed) { ejecutarAccionCarrito(carritoBaseUrl + '/vaciar', 'POST'); } });
+	         // } else {
 	             if (confirm('¿Vaciar todo el carrito?')) {
 	                 ejecutarAccionCarrito(carritoBaseUrl + '/vaciar', 'POST');
 	             }
-	         }
+	         //}
+	     }
 
-	        // ----- FUNCIÓN CORE AJAX -----
-	        async function ejecutarAccionCarrito(url, method, body = null, inputElement = null) {
-	            if (isCartActionRunning) {
-	                console.warn("Acción de carrito ya en progreso. Inténtalo de nuevo.");
-	                // Opcional: Mostrar mensaje al usuario
-	                return;
-	            }
-	            isCartActionRunning = true;
-	            console.log(`Ejecutando ${method} en ${url}`);
-
-	            // Opcional: Mostrar un loader/spinner
-	            // showLoader();
-
-	            try {
-	                const fetchOptions = {
-	                    method: method,
-	                    headers: {
-	                       'X-Requested-With': 'XMLHttpRequest'
-	                       // Si usas URLSearchParams, el Content-Type se setea automáticamente
-	                    },
-	                    body: body // Puede ser null, URLSearchParams, FormData
-	                };
-
-	                const response = await fetch(url, fetchOptions);
-	                const data = await response.json();
-
-	                if (response.ok && data.success) {
-	                    console.log("Éxito:", data.message);
-	                     actualizarUI(data.itemCount, data.carritoHtml);
-	                     mostrarNotificacion(data.message || 'Carrito actualizado', 'success');
-	                     pulsarIconoCarrito();
-	                } else {
-	                    console.error("Error:", data.message);
-	                    mostrarNotificacion(data.message || 'Error al actualizar carrito', 'error');
-	                    // Si falló una actualización, restaurar valor o recargar
-	                     if (inputElement) {
-	                         // inputElement.value = inputElement.defaultValue; // Si guardaste el valor inicial
-	                         actualizarVistaCarritoCompleta(); // Recargar para obtener estado correcto
-	                     }
-	                }
-	            } catch (error) {
-	                console.error('Error de Fetch:', error);
-	                 mostrarNotificacion('Error de conexión. Intenta de nuevo.', 'error');
-	            } finally {
-	                 isCartActionRunning = false;
-	                 // hideLoader();
-	            }
+	    // ----- FUNCIÓN CORE AJAX -----
+	    async function ejecutarAccionCarrito(url, method, body = null, inputElement = null) {
+	        if (isCartActionRunning) {
+	            console.warn("Acción de carrito ya en progreso...");
+	            mostrarNotificacion("Espera un momento...", "info");
+	            return;
 	        }
+	        isCartActionRunning = true;
+	        console.log(`Ejecutando ${method} en ${url}`);
+	        // Opcional: Mostrar un loader general
+	        // showGlobalLoader();
 
-	        // ----- FUNCIONES UI -----
-	        function actualizarUI(itemCount, carritoHtml) {
-	            const countElement = document.getElementById('cart-item-count');
-	            if (countElement) {
-	                countElement.textContent = itemCount > 0 ? itemCount : '';
-	                countElement.style.display = itemCount > 0 ? 'inline-block' : 'none';
-	            }
-	            const modalBody = document.getElementById('carrito-contenido');
-	            if (modalBody) {
-	                modalBody.innerHTML = carritoHtml;
-	                // Guardar valor inicial de inputs de cantidad para posible restauración
-	                 modalBody.querySelectorAll('input[type="number"][data-product-id]').forEach(input => {
-	                     input.defaultValue = input.value;
-	                 });
-	            }
-	        }
+	        try {
+	            const fetchOptions = {
+	                method: method,
+	                headers: {'X-Requested-With': 'XMLHttpRequest'},
+	                body: body
+	            };
 
-	        async function actualizarVistaCarritoCompleta() {
-	             console.log("Recargando vista del carrito...");
+	            const response = await fetch(url, fetchOptions);
+	            const data = await response.json();
+
+	            // Guardar el valor del input ANTES de actualizar la UI
+	            let productIdWithError = null;
+	            if(inputElement) {
+	                productIdWithError = inputElement.getAttribute('data-product-id');
+	            }
+
+
+	            if (response.ok && data.success !== false) { // Aceptar true o undefined
+	                console.log("Éxito:", data.message);
+	                 actualizarUI(data.itemCount, data.carritoHtml); // Actualiza contador y modal HTML
+	                 mostrarNotificacion(data.message || 'Carrito actualizado', 'success');
+	                 pulsarIconoCarrito();
+	            } else {
+	                // Error reportado por el backend o error HTTP
+	                const errorMsg = data.message || `Error ${response.status} al contactar el servidor.`;
+	                console.error("Error:", errorMsg, data);
+	                mostrarNotificacion(errorMsg, 'error');
+	                // Si falló una actualización, restaurar valor o recargar
+	                 if (productIdWithError) {
+	                     // Intenta restaurar el valor visualmente
+	                     const failedInput = document.querySelector(`.cart-item-qty[data-product-id="${productIdWithError}"]`);
+	                     if(failedInput) failedInput.value = originalCartItemValue[productIdWithError] || 1;
+	                     console.warn(`Valor restaurado para ${productIdWithError} a ${originalCartItemValue[productIdWithError] || 1}`);
+	                 } else {
+	                     // Si falló algo más, recargar todo por si acaso
+	                     actualizarVistaCarritoCompleta(true); // Forzar recarga de HTML
+	                 }
+	            }
+	        } catch (error) {
+	            // Error de red o al procesar JSON
+	            console.error('Error de Fetch:', error);
+	             mostrarNotificacion('Error de conexión. Intenta de nuevo.', 'error');
+	             // Asegurarse de que el spinner no se quede si falla la carga inicial
 	             const modalBody = document.getElementById('carrito-contenido');
-	             if (modalBody && !document.getElementById('carritoModal').classList.contains('show')) {
-	                 // Si el modal no está abierto, solo actualiza el contador
-	                 try {
-	                      const response = await fetch(carritoBaseUrl + '/resumen');
-	                      if (!response.ok) throw new Error('Network response was not ok');
-	                      const data = await response.json();
-	                      if (data.success !== false) {
-	                            const countElement = document.getElementById('cart-item-count');
-	                           if (countElement) {
-	                               countElement.textContent = data.itemCount > 0 ? data.itemCount : '';
-	                               countElement.style.display = data.itemCount > 0 ? 'inline-block' : 'none';
-	                           }
-	                      }
-	                 } catch (error) { console.error('Error al actualizar contador:', error); }
-	                 return; // No renderizar HTML si el modal está cerrado
+	             if(modalBody && modalBody.innerHTML.includes('spinner-border')) {
+	                modalBody.innerHTML = `<div class="alert alert-danger m-3" role="alert">Error de conexión al cargar el carrito.</div>`;
 	             }
+	        } finally {
+	             isCartActionRunning = false;
+	             // hideGlobalLoader();
+	        }
+	    }
 
-	             // Si el modal está abierto o es la carga inicial, muestra spinner y carga HTML
-	             if(modalBody) modalBody.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
-
-	             try {
-	                  const response = await fetch(carritoBaseUrl + '/resumen');
-	                  if (!response.ok) throw new Error('Error al cargar resumen');
-	                  const data = await response.json();
-	                  if (data.success !== false) {
-	                       actualizarUI(data.itemCount, data.carritoHtml);
-	                  } else {
-	                       throw new Error(data.message || 'Error del servidor al cargar carrito');
-	                  }
-	             } catch (error) {
-	                  console.error('Error al cargar carrito:', error);
-	                  mostrarNotificacion('No se pudo cargar el carrito.', 'error');
-	                   if(modalBody) modalBody.innerHTML = `<div class="alert alert-danger m-3">Error: ${error.message}. Intenta de nuevo.</div>`;
-	             }
-	         }
-
-	         function pulsarIconoCarrito() {
-	             const iconContainer = document.getElementById('cart-icon-container');
-	             if (iconContainer) {
-	                 iconContainer.classList.add('cart-icon-pulse');
-	                 setTimeout(() => iconContainer.classList.remove('cart-icon-pulse'), 600);
-	             }
-	         }
-
-	          // --- Notificaciones (Placeholder - Implementa con tu librería preferida) ---
-	          function mostrarNotificacion(mensaje, tipo = 'info') {
-	              console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
-	              // AQUI integra Toastr, SweetAlert, Notyf, etc.
-	              // Ejemplo simple (¡pero intrusivo!)
-	              // if (tipo === 'error') alert('Error: ' + mensaje);
-	          }
-
-	        // --- Event Listener para abrir el modal ---
-	        var carritoModalElement = document.getElementById('carritoModal');
-	        if (carritoModalElement) {
-	             carritoModalElement.addEventListener('show.bs.modal', function (event) {
-	                 // Carga el contenido fresco cada vez que se abre el modal
-	                 actualizarVistaCarritoCompleta();
+	    // ----- FUNCIONES UI -----
+	    function actualizarUI(itemCount, carritoHtml) {
+	        // Actualizar contador
+	        const countElement = document.getElementById('cart-item-count');
+	        if (countElement) {
+	            itemCount = parseInt(itemCount) || 0; // Asegurarse que es número
+	            countElement.textContent = itemCount > 0 ? itemCount : '';
+	            countElement.style.display = itemCount > 0 ? 'inline-block' : 'none';
+	        }
+	        // Actualizar modal
+	        const modalBody = document.getElementById('carrito-contenido');
+	        if (modalBody) {
+	            modalBody.innerHTML = carritoHtml;
+	            // Guardar valor original de inputs para restauración
+	             originalCartItemValue = {};
+	             modalBody.querySelectorAll('input.cart-item-qty[data-product-id]').forEach(input => {
+	                 originalCartItemValue[input.getAttribute('data-product-id')] = input.value;
 	             });
 	        }
+	    }
 
-	        // Carga inicial del contador al cargar la página
-	        document.addEventListener('DOMContentLoaded', actualizarVistaCarritoCompleta);
+	    async function actualizarVistaCarritoCompleta(forceHtmlUpdate = false) {
+	         const modalIsShown = document.getElementById('carritoModal')?.classList.contains('show');
+	         const modalBody = document.getElementById('carrito-contenido');
 
-	    </script>
-	
+	         // Si el modal está cerrado Y no se fuerza la carga del HTML, solo pide el resumen (más ligero)
+	         if (!modalIsShown && !forceHtmlUpdate) {
+	              console.log("Actualizando solo contador (modal cerrado).");
+	             try {
+	                  // Idealmente, tener un endpoint que solo devuelva el count
+	                  // Pero reusaremos /resumen por ahora
+	                  const response = await fetch(carritoBaseUrl + '/resumen');
+	                  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+	                  const data = await response.json();
+	                  if (data && data.itemCount !== undefined) { // Verificar que la respuesta sea válida
+	                        const countElement = document.getElementById('cart-item-count');
+	                       if (countElement) {
+	                           const itemCount = parseInt(data.itemCount) || 0;
+	                           countElement.textContent = itemCount > 0 ? itemCount : '';
+	                           countElement.style.display = itemCount > 0 ? 'inline-block' : 'none';
+	                       }
+	                  } else {
+	                       throw new Error("Respuesta inválida del servidor para /resumen");
+	                  }
+	             } catch (error) { console.error('Error al actualizar contador:', error); }
+	             return;
+	         }
+
+	         // Carga completa (modal abierto, carga inicial o forzado)
+	         console.log("Recargando HTML del carrito...");
+	         // Mostrar spinner solo si el modal está visible o es la carga inicial
+	         if (modalBody && (modalIsShown || document.readyState !== 'complete')) {
+	            modalBody.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
+	         }
+
+	         try {
+	              const response = await fetch(carritoBaseUrl + '/resumen');
+	              if (!response.ok) throw new Error(`Error ${response.status} al cargar resumen`);
+	              const data = await response.json();
+
+	              // Validar respuesta
+	              if (data && data.itemCount !== undefined && data.carritoHtml !== undefined) {
+	                   actualizarUI(data.itemCount, data.carritoHtml); // Actualiza contador y modal
+	              } else {
+	                   throw new Error(data.message || 'Respuesta inválida del servidor');
+	              }
+	         } catch (error) {
+	              console.error('Error al cargar carrito:', error);
+	              mostrarNotificacion(`No se pudo cargar el carrito: ${error.message}`, 'error');
+	               if(modalBody) {
+	                   modalBody.innerHTML = `<div class="alert alert-danger m-3" role="alert">Error al cargar el carrito. Por favor, intenta de nuevo.<br><small>${error.message}</small></div>`;
+	               }
+	               // Asegurarse de que el contador no muestre nada si falla la carga
+	                const countElement = document.getElementById('cart-item-count');
+	                if(countElement) countElement.style.display = 'none';
+	         }
+	     }
+
+	     function pulsarIconoCarrito() {
+	         const iconContainer = document.getElementById('cart-icon-container');
+	         iconContainer?.classList.add('cart-icon-pulse');
+	         setTimeout(() => iconContainer?.classList.remove('cart-icon-pulse'), 600);
+	     }
+
+	      // --- Notificaciones (Placeholder) ---
+	      function mostrarNotificacion(mensaje, tipo = 'info') {
+	          console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
+	          // Considera integrar una librería como Toastr o SweetAlert2 aquí
+	          // if (tipo === 'error') alert('Error: ' + mensaje); // Evitar alerts en producción
+	      }
+
+	    // --- Event Listener para abrir el modal ---
+	    var carritoModalElement = document.getElementById('carritoModal');
+	    if (carritoModalElement) {
+	         carritoModalElement.addEventListener('show.bs.modal', function () {
+	             actualizarVistaCarritoCompleta(true); // Forzar carga de HTML al abrir
+	         });
+	    }
+
+	    // Carga inicial del contador y posible HTML si el modal estuviera abierto (poco probable)
+	    document.addEventListener('DOMContentLoaded', () => {
+	         console.log("DOM cargado, actualizando carrito...");
+	         actualizarVistaCarritoCompleta(false); // Carga inicial, no forzar HTML si modal cerrado
+	    });
+
+	</script>
 	
 	
 	<th:block th:insert="${additionalScripts} ?: ~{}" />

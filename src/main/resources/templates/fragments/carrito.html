@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-    <div th:fragment="items(carrito)">
+    <div th:fragment="items" th:with="carrito=${carrito}">
 
         <div th:if="${carrito == null or carrito.items.isEmpty()}" class="text-center p-4">
             <p class="lead">Tu carrito está vacío.</p>
@@ -42,7 +42,7 @@
                     <span th:text="'S/ ' + ${#numbers.formatDecimal(carrito.getSubtotalTotal(), 1, 2)}"></span>
                 </div>
                 <div class="d-flex justify-content-between">
-                     <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarrito()">Vaciar Carrito</button> <a th:href="@{/carrito/checkout}" class="btn btn-success">Proceder al Pedido</a>
+                     <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarrito()">Vaciar Carrito</button> <a href="" class="btn btn-success">Proceder al Pedido</a>
                 </div>
                
             </div>

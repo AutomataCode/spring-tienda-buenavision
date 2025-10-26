@@ -40,11 +40,14 @@ public class SecurityConfig {
 
 
     @Bean
-    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
+                                                         PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
+
 
 
     @Bean
@@ -68,7 +71,7 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider)
             .formLogin(form -> form
                     .loginPage("/login")
-                    .successHandler(successHandler) // ⬅️ ¡AQUÍ ESTÁ LA MAGIA!
+                    .successHandler(successHandler) // 
                     .permitAll()
                 )
                 .logout(logout -> logout
