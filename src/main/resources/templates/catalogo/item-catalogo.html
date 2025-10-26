@@ -61,29 +61,32 @@
 	                               <li>Excepteur sint</li>
 	                           </ul>
 
-	                           <form action="" method="GET">
-	                               <input type="hidden" name="product-title" value="Activewear">
-	                               <div class="row">
-	                       
-	                                   <div class="col-auto">
-	                                       <ul class="list-inline pb-3">
-	                                           <li class="list-inline-item text-right">
-	                                               Cantidad
-	                                               <input type="hidden" name="product-quanity" id="product-quanity" value="1">
-	                                           </li>
-	                                           <li class="list-inline-item"><span class="btn btn-success" id="btn-minus">-</span></li>
-	                                           <li class="list-inline-item"><span class="badge bg-secondary" id="var-value">1</span></li>
-	                                           <li class="list-inline-item"><span class="btn btn-success" id="btn-plus">+</span></li>
-	                                       </ul>
-	                                   </div>
-	                               </div>
-	                               <div class="row pb-3">
-	                                 
-	                                   <div class="col d-grid">
-	                                       <button type="submit" class="btn btn-success btn-lg" name="submit" value="addtocard">Agregar al Carrito</button>
-	                                   </div>
-	                               </div>
-	                           </form>
+							   <input type="hidden" id="product-id-hidden" th:value="${producto.idProducto}"> <div class="row">
+							       <div class="col-auto">
+							           <ul class="list-inline pb-3">
+							               <li class="list-inline-item">Cantidad</li>
+							               <li class="list-inline-item">
+							                   <button type="button" class="btn btn-success btn-sm" id="btn-minus" onclick="cambiarCantidadDetalle(-1)">-</button>
+							               </li>
+							               <li class="list-inline-item">
+							                    <input type="number" class="form-control form-control-sm text-center" id="product-quanity-visible" value="1" min="1" th:max="${producto.stockActual}" style="width: 60px;">
+							               </li>
+							               <li class="list-inline-item">
+							                   <button type="button" class="btn btn-success btn-sm" id="btn-plus" onclick="cambiarCantidadDetalle(1)">+</button>
+							               </li>
+							           </ul>
+							       </div>
+							   </div>
+							   <div class="row pb-3">
+							       <div class="col d-grid">
+							           <button type="button" class="btn btn-success btn-lg"
+							                   onclick="agregarDesdeDetalleDesdeVista()"> <i class="fas fa-cart-plus me-1"></i>Agregar al Carrito
+							           </button>
+							       </div>
+							   </div>
+							   
+							   
+							   
 
 	                       </div>
 	                   </div>
@@ -564,8 +567,42 @@
 	    </section>
 	    <!-- End Article -->
 	  
-	
+			
+		<th:block id="scriptsDetalle">
+		  <script th:src="@{/js/slick.min.js}"></script> <script th:inline="javascript">
+		      // Script para el contador de cantidad en la página de detalle
+		      const stockMaximo = /*[[${producto.stockActual}]]*/ 1; // Obtener stock del modelo
 
+		      function cambiarCantidadDetalle(cambio) {
+		          const cantidadInput = document.getElementById('product-quanity-visible');
+		          let valorActual = parseInt(cantidadInput.value);
+		          let nuevoValor = valorActual + cambio;
+
+		          if (nuevoValor < 1) {
+		              nuevoValor = 1;
+		          }
+		          if (nuevoValor > stockMaximo) {
+		              nuevoValor = stockMaximo;
+		              // Opcional: mostrar mensaje de stock máximo
+		              // mostrarNotificacion(`Solo quedan ${stockMaximo} unidades en stock.`, 'warning');
+		          }
+		          cantidadInput.value = nuevoValor;
+		      }
+
+		      // Función para llamar al agregar principal desde esta vista específica
+		      function agregarDesdeDetalleDesdeVista() {
+		          const productoId = document.getElementById('product-id-hidden').value;
+		          const cantidad = document.getElementById('product-quanity-visible').value;
+
+		          const formData = new URLSearchParams();
+		          formData.append('cantidad', cantidad);
+		          ejecutarAccionCarrito(carritoBaseUrl + '/agregar/' + productoId, 'POST', formData);
+		      }
+
+		       // Inicializar Slick si lo usas
+		      // $('#carousel-related-product').slick({ ... });
+		  </script>
+		</th:block>
 	    
 	 
 </body>

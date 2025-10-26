@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="https://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(title, bodyContent, additionalStyles, additionalScripts)">
+<html lang="es" xmlns:th="https://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	th:fragment="layout(title, bodyContent, additionalStyles, additionalScripts)">
 
 <head>
 	<title>Zay Shop eCommerce HTML CSS Template</title>
@@ -18,24 +19,69 @@
 	<link rel="stylesheet"
 		href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;700;900&display=swap">
 	<link rel="stylesheet" th:href="@{/css/fontawesome.min.css}">
-	
+
 	<style>
 		.product-card {
-		       transition: transform 0.3s ease, box-shadow 0.3s ease;
-		   }
-		   .product-card:hover {
-		       transform: translateY(-5px);
-		       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-		   }
-		   
-		   .product-image {
-		           height: 250px;
-		           object-fit: cover;
-		       }
-	</style>	
-	
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+		}
+
+		.product-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		}
+
+		.product-image {
+			height: 250px;
+			object-fit: cover;
+		}
+
+		/* Estilos para el modal y feedback */
+		#carritoModal .modal-dialog {
+			max-width: 700px;
+		}
+
+		#carritoModal img {
+			object-fit: contain;
+		}
+
+		#carrito-contenido {
+			min-height: 150px;
+			/* Para mostrar spinner */
+		}
+
+		.cart-icon-pulse {
+			animation: pulse 0.6s ease-out;
+		}
+
+		@keyframes pulse {
+			0% {
+				transform: scale(1);
+			}
+
+			50% {
+				transform: scale(1.3);
+			}
+
+			100% {
+				transform: scale(1);
+			}
+		}
+
+		/* Estilos para input number pequeño */
+		input[type=number]::-webkit-inner-spin-button,
+		input[type=number]::-webkit-outer-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+
+		input[type=number] {
+			-moz-appearance: textfield;
+			/* Firefox */
+		}
+	</style>
+
 	<th:block th:insert="${additionalStyles} ?: ~{}" />
-		
+
 
 
 </head>
@@ -43,24 +89,230 @@
 <body>
 	<!-- Header -->
 	<div th:replace="fragments/header :: userNotLog"></div>
-	
 
-	   <div th:insert="${bodyContent}"></div>
+
+	<div th:insert="${bodyContent}"></div>
 
 	<div th:replace="fragments/footer :: footer"></div>
 	
+	
+	
+	<div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
+	      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+	        <div class="modal-content">
+	          <div class="modal-header">
+	            <h5 class="modal-title" id="carritoModalLabel"><i class="fas fa-shopping-cart me-2"></i>Mi Carrito</h5>
+	            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	          </div>
+	          <div class="modal-body p-0" id="carrito-contenido">
+	            <div class="text-center p-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div></div>
+	          </div>
+	          </div>
+	      </div>
+	    </div>
+	
+	
+
 	<!-- Start Script -->
-	<script th:src="@{/js/jquery-1.11.0.min.js}" ></script>
-	  <script th:src="@{/js/jquery-migrate-1.2.1.min.js}" ></script>
-	  <script th:src="@{/js/bootstrap.bundle.min.js}" ></script>
-	  <script th:src="@{/js/slick.min.js}"></script>
-	  <script th:src="@{/js/templatemo.js}" ></script>
-	  <script th:src="@{/js/custom.js}" ></script>
+	<script th:src="@{/js/jquery-1.11.0.min.js}"></script>
+	<script th:src="@{/js/jquery-migrate-1.2.1.min.js}"></script>
+	<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/js/slick.min.js}"></script>
+	<script th:src="@{/js/templatemo.js}"></script>
+	<script th:src="@{/js/custom.js}"></script>
 
 	<!-- End Script -->
-
-	<th:block th:insert="${additionalScripts} ?: ~{}" />
 	
+	<script th:inline="javascript">
+	        const carritoBaseUrl = /*[[@{/carrito}]]*/ '/carrito';
+	        // Variable global para evitar múltiples llamadas simultáneas
+	        let isCartActionRunning = false;
+
+	        // ----- FUNCIONES DE ACCIÓN -----
+	        function agregarAlCarrito(productoId) {
+	            ejecutarAccionCarrito(carritoBaseUrl + '/agregar/' + productoId, 'POST');
+	        }
+
+	        function agregarDesdeDetalle(productoId) {
+	             const cantidadInput = document.getElementById('product-quanity');
+	             const cantidad = cantidadInput ? parseInt(cantidadInput.value) : 1;
+	             const formData = new URLSearchParams(); // Usar URLSearchParams para POST simple
+	             formData.append('cantidad', cantidad);
+	             ejecutarAccionCarrito(carritoBaseUrl + '/agregar/' + productoId, 'POST', formData);
+	        }
+
+	        function eliminarItem(productoId) {
+	             if (confirm('¿Eliminar este producto del carrito?')) {
+	                  ejecutarAccionCarrito(carritoBaseUrl + '/eliminar/' + productoId, 'POST');
+	             }
+	        }
+
+	        function actualizarCantidad(inputElement) {
+	             const productoId = inputElement.getAttribute('data-product-id');
+	             const cantidad = parseInt(inputElement.value);
+
+	             if (isNaN(cantidad) || cantidad < 0) {
+	                  // Restaurar valor anterior o simplemente no hacer nada y recargar
+	                  console.warn("Cantidad inválida.");
+	                  inputElement.value = inputElement.defaultValue; // Restaura si guardaste el default
+	                  // Opcional: mostrar error brevemente
+	                  return;
+	             }
+	             if (cantidad === 0) {
+	                 eliminarItem(productoId);
+	                 return;
+	             }
+
+	             const formData = new URLSearchParams();
+	             formData.append('cantidad', cantidad);
+	             ejecutarAccionCarrito(carritoBaseUrl + '/actualizar/' + productoId, 'POST', formData, inputElement);
+	        }
+
+	         function vaciarCarrito() {
+	             if (confirm('¿Vaciar todo el carrito?')) {
+	                 ejecutarAccionCarrito(carritoBaseUrl + '/vaciar', 'POST');
+	             }
+	         }
+
+	        // ----- FUNCIÓN CORE AJAX -----
+	        async function ejecutarAccionCarrito(url, method, body = null, inputElement = null) {
+	            if (isCartActionRunning) {
+	                console.warn("Acción de carrito ya en progreso. Inténtalo de nuevo.");
+	                // Opcional: Mostrar mensaje al usuario
+	                return;
+	            }
+	            isCartActionRunning = true;
+	            console.log(`Ejecutando ${method} en ${url}`);
+
+	            // Opcional: Mostrar un loader/spinner
+	            // showLoader();
+
+	            try {
+	                const fetchOptions = {
+	                    method: method,
+	                    headers: {
+	                       'X-Requested-With': 'XMLHttpRequest'
+	                       // Si usas URLSearchParams, el Content-Type se setea automáticamente
+	                    },
+	                    body: body // Puede ser null, URLSearchParams, FormData
+	                };
+
+	                const response = await fetch(url, fetchOptions);
+	                const data = await response.json();
+
+	                if (response.ok && data.success) {
+	                    console.log("Éxito:", data.message);
+	                     actualizarUI(data.itemCount, data.carritoHtml);
+	                     mostrarNotificacion(data.message || 'Carrito actualizado', 'success');
+	                     pulsarIconoCarrito();
+	                } else {
+	                    console.error("Error:", data.message);
+	                    mostrarNotificacion(data.message || 'Error al actualizar carrito', 'error');
+	                    // Si falló una actualización, restaurar valor o recargar
+	                     if (inputElement) {
+	                         // inputElement.value = inputElement.defaultValue; // Si guardaste el valor inicial
+	                         actualizarVistaCarritoCompleta(); // Recargar para obtener estado correcto
+	                     }
+	                }
+	            } catch (error) {
+	                console.error('Error de Fetch:', error);
+	                 mostrarNotificacion('Error de conexión. Intenta de nuevo.', 'error');
+	            } finally {
+	                 isCartActionRunning = false;
+	                 // hideLoader();
+	            }
+	        }
+
+	        // ----- FUNCIONES UI -----
+	        function actualizarUI(itemCount, carritoHtml) {
+	            const countElement = document.getElementById('cart-item-count');
+	            if (countElement) {
+	                countElement.textContent = itemCount > 0 ? itemCount : '';
+	                countElement.style.display = itemCount > 0 ? 'inline-block' : 'none';
+	            }
+	            const modalBody = document.getElementById('carrito-contenido');
+	            if (modalBody) {
+	                modalBody.innerHTML = carritoHtml;
+	                // Guardar valor inicial de inputs de cantidad para posible restauración
+	                 modalBody.querySelectorAll('input[type="number"][data-product-id]').forEach(input => {
+	                     input.defaultValue = input.value;
+	                 });
+	            }
+	        }
+
+	        async function actualizarVistaCarritoCompleta() {
+	             console.log("Recargando vista del carrito...");
+	             const modalBody = document.getElementById('carrito-contenido');
+	             if (modalBody && !document.getElementById('carritoModal').classList.contains('show')) {
+	                 // Si el modal no está abierto, solo actualiza el contador
+	                 try {
+	                      const response = await fetch(carritoBaseUrl + '/resumen');
+	                      if (!response.ok) throw new Error('Network response was not ok');
+	                      const data = await response.json();
+	                      if (data.success !== false) {
+	                            const countElement = document.getElementById('cart-item-count');
+	                           if (countElement) {
+	                               countElement.textContent = data.itemCount > 0 ? data.itemCount : '';
+	                               countElement.style.display = data.itemCount > 0 ? 'inline-block' : 'none';
+	                           }
+	                      }
+	                 } catch (error) { console.error('Error al actualizar contador:', error); }
+	                 return; // No renderizar HTML si el modal está cerrado
+	             }
+
+	             // Si el modal está abierto o es la carga inicial, muestra spinner y carga HTML
+	             if(modalBody) modalBody.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
+
+	             try {
+	                  const response = await fetch(carritoBaseUrl + '/resumen');
+	                  if (!response.ok) throw new Error('Error al cargar resumen');
+	                  const data = await response.json();
+	                  if (data.success !== false) {
+	                       actualizarUI(data.itemCount, data.carritoHtml);
+	                  } else {
+	                       throw new Error(data.message || 'Error del servidor al cargar carrito');
+	                  }
+	             } catch (error) {
+	                  console.error('Error al cargar carrito:', error);
+	                  mostrarNotificacion('No se pudo cargar el carrito.', 'error');
+	                   if(modalBody) modalBody.innerHTML = `<div class="alert alert-danger m-3">Error: ${error.message}. Intenta de nuevo.</div>`;
+	             }
+	         }
+
+	         function pulsarIconoCarrito() {
+	             const iconContainer = document.getElementById('cart-icon-container');
+	             if (iconContainer) {
+	                 iconContainer.classList.add('cart-icon-pulse');
+	                 setTimeout(() => iconContainer.classList.remove('cart-icon-pulse'), 600);
+	             }
+	         }
+
+	          // --- Notificaciones (Placeholder - Implementa con tu librería preferida) ---
+	          function mostrarNotificacion(mensaje, tipo = 'info') {
+	              console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
+	              // AQUI integra Toastr, SweetAlert, Notyf, etc.
+	              // Ejemplo simple (¡pero intrusivo!)
+	              // if (tipo === 'error') alert('Error: ' + mensaje);
+	          }
+
+	        // --- Event Listener para abrir el modal ---
+	        var carritoModalElement = document.getElementById('carritoModal');
+	        if (carritoModalElement) {
+	             carritoModalElement.addEventListener('show.bs.modal', function (event) {
+	                 // Carga el contenido fresco cada vez que se abre el modal
+	                 actualizarVistaCarritoCompleta();
+	             });
+	        }
+
+	        // Carga inicial del contador al cargar la página
+	        document.addEventListener('DOMContentLoaded', actualizarVistaCarritoCompleta);
+
+	    </script>
+	
+	
+	
+	<th:block th:insert="${additionalScripts} ?: ~{}" />
+
 </body>
 
 </html>

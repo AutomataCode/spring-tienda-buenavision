@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <div th:fragment="items(carrito)">
+
+        <div th:if="${carrito == null or carrito.items.isEmpty()}" class="text-center p-4">
+            <p class="lead">Tu carrito está vacío.</p>
+            <a th:href="@{/catalogo}" class="btn btn-outline-primary" data-bs-dismiss="modal">Seguir comprando</a>
+        </div>
+
+        <div th:if="${carrito != null and not carrito.items.isEmpty()}">
+            <ul class="list-group list-group-flush">
+                <li th:each="item, iterStat : ${carrito.items}" class="list-group-item d-flex justify-content-between align-items-center flex-wrap px-3 py-2">
+
+                    <div class="d-flex align-items-center mb-2 mb-sm-0 me-3" style="min-width: 200px; flex-grow: 1;">
+                        <img th:src="${item.producto.imagenUrl ?: '/img/default-product.png'}" alt="" width="50" height="50" class="me-3 rounded" style="object-fit: contain;">
+                        <div>
+                            <small class="fw-bold d-block" th:text="${item.producto.nombre}"></small>
+                            <small class="text-muted" th:text="'S/ ' + ${#numbers.formatDecimal(item.precioUnitario, 1, 2)}"></small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-end" style="min-width: 150px;">
+                        <input type="number" class="form-control form-control-sm text-center me-2"
+                               style="width: 65px;"
+                               th:value="${item.cantidad}" min="1"
+                               th:max="${item.producto.stockActual}"
+                               th:attr="data-product-id=${item.producto.idProducto}"
+                               onchange="actualizarCantidad(this)"> <button class="btn btn-outline-danger btn-sm"
+                                th:attr="onclick=|eliminarItem(${item.producto.idProducto})|"> <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="w-100 text-end mt-1 d-sm-none"> <small>Subtotal: <span class="fw-bold" th:text="'S/ ' + ${#numbers.formatDecimal(item.getSubtotal(), 1, 2)}"></span></small>
+                     </div>
+                </li>
+            </ul>
+
+            <div class="p-3 border-top mt-auto"> <div class="d-flex justify-content-between mb-3 fw-bold fs-5">
+                    <span>Subtotal:</span>
+                    <span th:text="'S/ ' + ${#numbers.formatDecimal(carrito.getSubtotalTotal(), 1, 2)}"></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                     <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarrito()">Vaciar Carrito</button> <a th:href="@{/carrito/checkout}" class="btn btn-success">Proceder al Pedido</a>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
