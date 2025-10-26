@@ -1,85 +1,148 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="https://www.thymeleaf.org"
-    th:replace="layouts/base :: layout(~{::title}, ~{::body}, _, _)">
+<html lang="es" xmlns:th="https://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="layouts/base :: layout(~{::title}, ~{::body}, _, _)">
 
 <head>
-    <title>Registro de Usuario - Buena Visión</title>
+	<title>Registro de Usuario - Buena Visión</title>
 </head>
 
 <body>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-7">
-                
-                <div class="card shadow-lg border-0 rounded-lg mt-5">
-                    <div class="card-header bg-success text-white text-center">
-                        <h3 class="my-4">Crear una Cuenta</h3>
-                    </div>
-                    <div class="card-body p-4 p-sm-5">
+	<div class="container py-5">
+		<div class="row justify-content-center">
+			<div class="col-md-8 col-lg-7">
 
-						<form th:action="@{/public/registro}" th:object="${usuario}" method="post" novalidate>
+				<div class="card shadow-lg border-0 rounded-lg mt-5">
+					<div class="card-header bg-success text-white text-center">
+						<h3 class="my-4">Crear una Cuenta</h3>
+					</div>
+					<div class="card-body p-4 p-sm-5">
 
-						    <div th:if="${#fields.hasErrors('global')}" class="alert alert-danger" role="alert">
-						        <p th:each="err : ${#fields.errors('global')}" th:text="${err}"></p>
-						    </div>
-                            
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" th:field="*{nombreCompleto}" 
-                                       id="nombreCompleto" placeholder="Nombre Completo" required 
-                                       th:classappend="${#fields.hasErrors('nombreCompleto')} ? 'is-invalid' : ''">
-                                <label for="nombreCompleto">Nombre Completo</label>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombreCompleto')}" 
-                                     th:errors="*{nombreCompleto}"></div>
-                            </div>
+						<form th:action="@{/public/registro}" th:object="${registroDto}" method="post" novalidate>
 
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" th:field="*{username}" 
-                                       id="username" placeholder="Nombre de Usuario" required
-                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
-                                <label for="username">Nombre de Usuario</label>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" 
-                                     th:errors="*{username}"></div>
-                            </div>
+							<div th:if="${#fields.hasErrors('global')}" class="alert alert-danger" role="alert">
+								<p th:each="err : ${#fields.errors('global')}" th:text="${err}"></p>
+							</div>
 
-                            <div class="form-floating mb-3">
-                                <input type="email" class="form-control" th:field="*{email}" 
-                                       id="email" placeholder="correo@ejemplo.com" required
-                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
-                                <label for="email">Correo Electrónico</label>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" 
-                                     th:errors="*{email}"></div>
-                            </div>
+							<h5 class="mb-3">Datos de Acceso</h5>
+							<hr class="mb-4">
 
-                            <div class="form-floating mb-3">
-                                <input type="password" class="form-control" th:field="*{password}" 
-                                       id="password" placeholder="Contraseña" required
-                                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
-                                <label for="password">Contraseña</label>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" 
-                                     th:errors="*{password}"></div>
-                            </div>
-                            
-                            <div class="form-floating mb-3">
-                                <input type="password" class="form-control" id="confirmPassword" 
-                                       name="confirmPassword" placeholder="Confirmar Contraseña" required>
-                                <label for="confirmPassword">Confirmar Contraseña</label>
-                            </div>
+							<div class="form-floating mb-3">
+								<input type="text" class="form-control" th:field="*{username}" id="username"
+									placeholder="Nombre de Usuario" required
+									th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+								<label for="username">Nombre de Usuario</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('username')}"
+									th:errors="*{username}"></div>
+							</div>
 
-                            <div class="d-grid mb-3">
-                                <button class="btn btn-success btn-lg" type="submit">Registrarse</button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="card-footer text-center py-3">
-                        <div class="small">
-                            <a th:href="@{/login}">¿Ya tienes cuenta? Inicia Sesión</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+							<div class="form-floating mb-3">
+								<input type="email" class="form-control" th:field="*{email}" id="email"
+									placeholder="correo@ejemplo.com" required
+									th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+								<label for="email">Correo Electrónico</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
+									th:errors="*{email}"></div>
+							</div>
+
+							<div class="form-floating mb-3">
+								<input type="password" class="form-control" th:field="*{password}" id="password"
+									placeholder="Contraseña" required
+									th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
+								<label for="password">Contraseña</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('password')}"
+									th:errors="*{password}"></div>
+							</div>
+
+							<div class="form-floating mb-3">
+								<input type="password" class="form-control" th:field="*{confirmPassword}"
+									id="confirmPassword" placeholder="Confirmar Contraseña" required
+									th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''">
+								<label for="confirmPassword">Confirmar Contraseña</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}"
+									th:errors="*{confirmPassword}"></div>
+							</div>
+
+							<h5 class="mt-5 mb-3">Datos Personales</h5>
+							<hr class="mb-4">
+
+							<div class="form-floating mb-3">
+								<input type="text" class="form-control" th:field="*{nombre}" id="nombre"
+									placeholder="Nombre(s)" required
+									th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''">
+								<label for="nombre">Nombre(s)</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
+									th:errors="*{nombre}"></div>
+							</div>
+
+							<div class="form-floating mb-3">
+								<input type="text" class="form-control" th:field="*{apellido}" id="apellido"
+									placeholder="Apellidos" required
+									th:classappend="${#fields.hasErrors('apellido')} ? 'is-invalid' : ''">
+								<label for="apellido">Apellidos</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('apellido')}"
+									th:errors="*{apellido}"></div>
+							</div>
+
+							<div class="row g-2 mb-3">
+								<div class="col-md-5">
+									<div class="form-floating">
+										<select class="form-select" id="tipoDocumento" th:field="*{tipoDocumento}"
+											th:classappend="${#fields.hasErrors('tipoDocumento')} ? 'is-invalid' : ''">
+											<option
+												th:each="tipo : ${T(utp.edu.pe.entity.enums.TipoDocumento).values()}"
+												th:value="${tipo}" th:text="${tipo.name()}"></option>
+										</select>
+										<label for="tipoDocumento">Tipo Documento</label>
+										<div class="invalid-feedback" th:if="${#fields.hasErrors('tipoDocumento')}"
+											th:errors="*{tipoDocumento}"></div>
+									</div>
+								</div>
+								<div class="col-md-7">
+									<div class="form-floating">
+										<input type="text" class="form-control" th:field="*{numeroDocumento}"
+											id="numeroDocumento" placeholder="Número de Documento" required
+											th:classappend="${#fields.hasErrors('numeroDocumento')} ? 'is-invalid' : ''">
+										<label for="numeroDocumento">Número de Documento</label>
+										<div class="invalid-feedback" th:if="${#fields.hasErrors('numeroDocumento')}"
+											th:errors="*{numeroDocumento}"></div>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="form-floating mb-3">
+								<input type="tel" class="form-control" th:field="*{telefono}" id="telefono"
+									placeholder="Teléfono"
+									th:classappend="${#fields.hasErrors('telefono')} ? 'is-invalid' : ''">
+								<label for="telefono">Teléfono (Opcional)</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}"
+									th:errors="*{telefono}"></div>
+							</div>
+
+							<div class="form-floating mb-3">
+								<textarea class="form-control" th:field="*{direccion}" id="direccion"
+									placeholder="Dirección" style="height: 100px"
+									th:classappend="${#fields.hasErrors('direccion')} ? 'is-invalid' : ''"></textarea>
+								<label for="direccion">Dirección (Opcional)</label>
+								<div class="invalid-feedback" th:if="${#fields.hasErrors('direccion')}"
+									th:errors="*{direccion}"></div>
+							</div>
+
+							<div class="d-grid mt-4 mb-3">
+								<button class="btn btn-success btn-lg" type="submit">Crear Cuenta</button>
+							</div>
+						</form>
+					</div>
+					<div class="card-footer text-center py-3">
+						<div class="small">
+							<a th:href="@{/login}">¿Ya tienes cuenta? Inicia Sesión</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 </body>
+
 </html>

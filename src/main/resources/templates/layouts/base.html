@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="https://www.thymeleaf.org" th:fragment="layout(title, bodyContent, additionalStyles, additionalScripts)">
+<html lang="es" xmlns:th="https://www.thymeleaf.org"  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:fragment="layout(title, bodyContent, additionalStyles, additionalScripts)">
 
 <head>
 	<title>Zay Shop eCommerce HTML CSS Template</title>
@@ -43,6 +43,7 @@
 <body>
 	<!-- Header -->
 	<div th:replace="fragments/header :: userNotLog"></div>
+	
 
 	   <div th:insert="${bodyContent}"></div>
 

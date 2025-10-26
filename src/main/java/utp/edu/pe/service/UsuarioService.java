@@ -3,6 +3,7 @@ package utp.edu.pe.service;
 import java.util.List;
 import java.util.Optional;
 
+import utp.edu.pe.dto.RegistroClienteDTO;
 import utp.edu.pe.entity.Usuario;
 import utp.edu.pe.entity.enums.EstadoGeneral;
 
@@ -28,5 +29,9 @@ public interface UsuarioService {
     Optional<Usuario> findById(Integer id);
     Usuario actualizar(Usuario usuario);
     void deleteById(Integer id);
+    
+
+    Usuario registrarCliente(RegistroClienteDTO dto);
+    
 
 }

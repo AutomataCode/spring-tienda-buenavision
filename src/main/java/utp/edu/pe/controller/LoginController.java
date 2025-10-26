@@ -17,7 +17,7 @@ public class LoginController {
         // Si la autenticación es válida y no es el "usuario anónimo"
         if (authentication != null && authentication.isAuthenticated() && 
             !"anonymousUser".equals(authentication.getPrincipal())) {
-            
+            	
             // Redirige al "home" (ajusta "/public" si tu home es otro)
             return "redirect:/public"; 
         }

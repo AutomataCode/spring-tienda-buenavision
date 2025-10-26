@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import utp.edu.pe.dto.RegistroClienteDTO;
 import utp.edu.pe.entity.Usuario;
 import utp.edu.pe.entity.enums.EstadoGeneral;
 import utp.edu.pe.entity.enums.Rolx;
+import utp.edu.pe.service.ClienteService;
 import utp.edu.pe.service.UsuarioService;
 
 @Controller
@@ -26,6 +28,9 @@ public class PublicController {
 	
 	@Autowired
     private UsuarioService usuarioService; 
+	
+	@Autowired
+	private ClienteService clienteService;
 
     // Inyecta el codificador de contraseñas
     @Autowired
@@ -40,64 +45,54 @@ public class PublicController {
 	@GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
        
-        model.addAttribute("usuario", new Usuario());
+        model.addAttribute("registroDto", new RegistroClienteDTO());
         return "public/registrar-usuario"; 
     }
 	
 	@PostMapping("/registro")
     public String procesarRegistro(
-            @Valid @ModelAttribute("usuario") Usuario usuario, // Obtiene el usuario y lo valida
-            BindingResult bindingResult, // Contiene los resultados de la validación
-            @RequestParam("confirmPassword") String confirmPassword, // Obtiene el campo extra
+            @Valid @ModelAttribute("registroDto") RegistroClienteDTO dto, // ⬅️ Usa el DTO
+            BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        // 1. Validaciones de @Valid
+        // 1. Validaciones de @Valid (campos vacíos, email, etc.)
         if (bindingResult.hasErrors()) {
-            // Si hay errores (ej. campos vacíos, email inválido),
-            // vuelve a mostrar el formulario con los mensajes de error.
-            return "registro";
+        	return "public/registrar-usuario"; 
         }
 
         // 2. Validación de Contraseña
-        if (!usuario.getPassword().equals(confirmPassword)) {
-            // Agrega un error específico al campo 'password'
-            bindingResult.rejectValue("password", "error.usuario", "Las contraseñas no coinciden");
-            return "registro";
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "error.dto", "Las contraseñas no coinciden");
+            return "public/registrar-usuario"; 
         }
 
-        // 3. Validar duplicados de Username y Email
-        if (usuarioService.findByUsername(usuario.getUsername()).isPresent()) {
-            bindingResult.rejectValue("username", "error.usuario", "El nombre de usuario ya está en uso");
-            return "registro";
+        // 3. Validar duplicados (usa los métodos del servicio)
+        if (usuarioService.existsByUsername(dto.getUsername())) {
+            bindingResult.rejectValue("username", "error.dto", "El nombre de usuario ya está en uso");
+            return "public/registrar-usuario"; 
         }
 
-        if (usuarioService.findByEmail(usuario.getEmail()).isPresent()) {
-            bindingResult.rejectValue("email", "error.usuario", "El correo electrónico ya está registrado");
-            return "registro";
+        if (usuarioService.existsByEmail(dto.getEmail())) {
+            bindingResult.rejectValue("email", "error.dto", "El correo electrónico ya está registrado");
+            return "public/registrar-usuario"; 
+        }
+        
+        
+        if (clienteService.existsByNumeroDocumento(dto.getNumeroDocumento())) {
+           bindingResult.rejectValue("numeroDocumento", "error.dto", "El documento ya está registrado");
+           return "public/registrar-usuario"; 
         }
 
-        // --- Si todas las validaciones pasan ---
+        // --- Si todo está bien ---
 
-        // 4. Cifrar la contraseña
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        // 5. Llamar al servicio para registrar AMBOS
+        usuarioService.registrarCliente(dto);
 
-        // 5. Establecer valores por defecto
-        usuario.setRol(Rolx.CLIENTE); // Rol por defecto para nuevos registros
-        usuario.setEstado(EstadoGeneral.ACTIVO); // Estado por defecto
-        usuario.setFechaCreacion(LocalDateTime.now());
-
-        // 6. Guardar el usuario
-        usuarioService.registrar(usuario); // Asumimos un método 'registrar' o 'save'
-
-        // 7. Redirigir al Login con un mensaje de éxito
-        // Usamos RedirectAttributes para pasar mensajes entre redirecciones
+        // 6. Redirigir al Login
         redirectAttributes.addFlashAttribute("registroExitoso", 
             "¡Cuenta creada exitosamente! Ya puedes iniciar sesión.");
         
-        return "redirect:/public"; // Redirige al controlador de login
+        return "redirect:/login";
     }
-	
-	
-
 }
