@@ -1,12 +1,18 @@
 package utp.edu.pe.controller;
-import utp.edu.pe.TiendaBuenaVisionApplication;
+
 import utp.edu.pe.dto.Carrito;
+
+// Tus imports de DTO, Servicio, Entidades, etc.
+
 import utp.edu.pe.service.CarritoService;
 
+// Imports de Logging
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+// Imports de Spring Core y Web
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext; // Necesario para SpringWebContext
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,28 +20,29 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.thymeleaf.TemplateEngine;
 
+// Imports de Thymeleaf (¡Importante!)
+import org.thymeleaf.TemplateEngine;
+ // <-- Este es el import clave para SB 3+
+import org.thymeleaf.context.WebContext;
+
+// Imports de Jakarta Servlet API (para request, response, context)
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.thymeleaf.spring6.context.SpringWebContext;
-
+// Imports de Java Util
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-// Ya no necesitas importar Locale explícitamente si usas request.getLocale()
-
+// Puedes quitar el import de Locale si usas request.getLocale() directamente
 
 @Controller
 @RequestMapping("/carrito")
 public class CarritoController {
-
-    private final TiendaBuenaVisionApplication tiendaBuenaVisionApplication;
-
+	
     private static final Logger logger = LoggerFactory.getLogger(CarritoController.class);
 
     @Autowired
@@ -47,17 +54,10 @@ public class CarritoController {
     @Autowired
     private ServletContext servletContext;
 
-    // Inyecta ApplicationContext
     @Autowired
-    private ApplicationContext applicationContext;
-
-    CarritoController(TiendaBuenaVisionApplication tiendaBuenaVisionApplication) {
-        this.tiendaBuenaVisionApplication = tiendaBuenaVisionApplication;
-    }
+    private ApplicationContext applicationContext; // Necesario para SpringWebContext
 
     // --- Endpoints AJAX (Agregar, Actualizar, Eliminar, Vaciar) ---
-    // (Estos métodos no cambian, solo necesitan pasar request y response
-    // a getCarritoResumenMap como ya lo hacían)
 
     @PostMapping("/agregar/{productoId}")
     @ResponseBody
@@ -69,88 +69,85 @@ public class CarritoController {
         try {
             carritoService.agregarItem(productoId, cantidad);
             responseMap.put("success", true);
-            responseMap.put("message", "Producto agregado");
+            responseMap.put("message", "Producto agregado al carrito.");
             responseMap.putAll(getCarritoResumenMap(request, response));
             return ResponseEntity.ok(responseMap);
         } catch (IllegalArgumentException e) {
-             logger.error("Error al agregar: {}", e.getMessage());
+             logger.warn("Intento fallido de agregar al carrito: {}", e.getMessage()); // Cambiado a WARN
              responseMap.put("success", false); responseMap.put("message", e.getMessage());
              return ResponseEntity.badRequest().body(responseMap);
         } catch (Exception e) {
-             logger.error("Error inesperado al agregar", e);
-             responseMap.put("success", false); responseMap.put("message", "Error interno.");
+             logger.error("Error inesperado al agregar producto al carrito", e);
+             responseMap.put("success", false); responseMap.put("message", "Error interno al procesar la solicitud.");
              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
 
-    // ... (actualizarCantidad, eliminarDelCarrito, vaciarCarrito - asegúrate que pasen request, response) ...
-
-     @PostMapping("/actualizar/{productoId}")
-     @ResponseBody
-     public ResponseEntity<Map<String, Object>> actualizarCantidad(
-             @PathVariable Long productoId,
-             @RequestParam int cantidad,
-             HttpServletRequest request, HttpServletResponse response) {
-          Map<String, Object> responseMap = new HashMap<>();
-          try {
-              if (cantidad <= 0) {
-                  carritoService.eliminarItem(productoId);
-                  responseMap.put("message", "Producto eliminado");
-              } else {
-                  carritoService.actualizarCantidad(productoId, cantidad);
-                  responseMap.put("message", "Cantidad actualizada");
-              }
-              responseMap.put("success", true);
-              responseMap.putAll(getCarritoResumenMap(request, response));
-              return ResponseEntity.ok(responseMap);
-          } catch (IllegalArgumentException e) {
-              logger.error("Error al actualizar: {}", e.getMessage());
-              responseMap.put("success", false); responseMap.put("message", e.getMessage());
-              return ResponseEntity.badRequest().body(responseMap);
-          } catch (Exception e) {
-              logger.error("Error inesperado al actualizar", e);
-              responseMap.put("success", false); responseMap.put("message", "Error interno.");
-              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
-          }
-     }
-
-     @PostMapping("/eliminar/{productoId}")
-     @ResponseBody
-     public ResponseEntity<Map<String, Object>> eliminarDelCarrito(
-             @PathVariable Long productoId,
-             HttpServletRequest request, HttpServletResponse response) {
+    @PostMapping("/actualizar/{productoId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> actualizarCantidad(
+            @PathVariable Long productoId,
+            @RequestParam int cantidad,
+            HttpServletRequest request, HttpServletResponse response) {
          Map<String, Object> responseMap = new HashMap<>();
          try {
-             carritoService.eliminarItem(productoId);
+             if (cantidad <= 0) {
+                 carritoService.eliminarItem(productoId);
+                 responseMap.put("message", "Producto eliminado del carrito.");
+             } else {
+                 carritoService.actualizarCantidad(productoId, cantidad);
+                 responseMap.put("message", "Cantidad actualizada.");
+             }
+             responseMap.put("success", true);
+             responseMap.putAll(getCarritoResumenMap(request, response));
+             return ResponseEntity.ok(responseMap);
+         } catch (IllegalArgumentException e) {
+             logger.warn("Intento fallido de actualizar cantidad: {}", e.getMessage()); // Cambiado a WARN
+             responseMap.put("success", false); responseMap.put("message", e.getMessage());
+             return ResponseEntity.badRequest().body(responseMap);
+         } catch (Exception e) {
+             logger.error("Error inesperado al actualizar cantidad en el carrito", e);
+             responseMap.put("success", false); responseMap.put("message", "Error interno al procesar la solicitud.");
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
+         }
+    }
+
+    @PostMapping("/eliminar/{productoId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> eliminarDelCarrito(
+            @PathVariable Long productoId,
+            HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Object> responseMap = new HashMap<>();
+        try {
+            carritoService.eliminarItem(productoId);
+             responseMap.put("success", true);
+             responseMap.put("message", "Producto eliminado del carrito.");
+             responseMap.putAll(getCarritoResumenMap(request, response));
+             return ResponseEntity.ok(responseMap);
+        } catch (Exception e) {
+             logger.error("Error inesperado al eliminar producto del carrito", e);
+             responseMap.put("success", false); responseMap.put("message", "Error interno al procesar la solicitud.");
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
+        }
+    }
+
+     @PostMapping("/vaciar")
+     @ResponseBody
+     public ResponseEntity<Map<String, Object>> vaciarCarrito(
+             HttpServletRequest request, HttpServletResponse response) {
+          Map<String, Object> responseMap = new HashMap<>();
+         try {
+              carritoService.vaciarCarrito();
               responseMap.put("success", true);
-              responseMap.put("message", "Producto eliminado");
+              responseMap.put("message", "Carrito vaciado exitosamente.");
               responseMap.putAll(getCarritoResumenMap(request, response));
               return ResponseEntity.ok(responseMap);
          } catch (Exception e) {
-              logger.error("Error inesperado al eliminar", e);
-              responseMap.put("success", false); responseMap.put("message", "Error interno.");
+              logger.error("Error inesperado al vaciar el carrito", e);
+              responseMap.put("success", false); responseMap.put("message", "Error interno al procesar la solicitud.");
               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
          }
      }
-
-      @PostMapping("/vaciar")
-      @ResponseBody
-      public ResponseEntity<Map<String, Object>> vaciarCarrito(
-              HttpServletRequest request, HttpServletResponse response) {
-           Map<String, Object> responseMap = new HashMap<>();
-          try {
-               carritoService.vaciarCarrito();
-               responseMap.put("success", true);
-               responseMap.put("message", "Carrito vaciado");
-               responseMap.putAll(getCarritoResumenMap(request, response));
-               return ResponseEntity.ok(responseMap);
-          } catch (Exception e) {
-               logger.error("Error inesperado al vaciar", e);
-               responseMap.put("success", false); responseMap.put("message", "Error interno.");
-               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
-          }
-      }
-
 
     // Endpoint GET /resumen
     @GetMapping("/resumen")
@@ -160,15 +157,16 @@ public class CarritoController {
         try {
              return ResponseEntity.ok(getCarritoResumenMap(request, response));
         } catch (Exception e) {
-             logger.error("Error al obtener resumen", e);
+             // El error específico ya se loggea dentro de getCarritoResumenMap si falla el renderizado
+             logger.error("Fallo general al obtener resumen del carrito", e); // Log adicional por si acaso
              Map<String, Object> errorResponse = new HashMap<>();
              errorResponse.put("success", false);
-             errorResponse.put("message", "Error al cargar resumen del carrito.");
+             errorResponse.put("message", "No se pudo cargar el resumen del carrito.");
               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
-    // Endpoint GET /checkout (sin cambios)
+    // Endpoint GET /checkout (sin cambios en la lógica principal)
     @GetMapping("/checkout")
     public String irAlCheckout(RedirectAttributes redirectAttributes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -178,56 +176,43 @@ public class CarritoController {
             return "redirect:/login";
         }
          if (carritoService.getCarrito().getItems().isEmpty()) {
-             logger.info("Checkout denegado: Carrito vacío.");
-              redirectAttributes.addFlashAttribute("warning", "Tu carrito está vacío.");
-              return "redirect:/catalogo";
+             logger.info("Checkout denegado: Carrito vacío para usuario {}", authentication.getName());
+              redirectAttributes.addFlashAttribute("warning", "Tu carrito está vacío, añade productos antes de proceder.");
+              return "redirect:/catalogo"; // Recomiendo redirigir al catálogo
          }
         logger.info("Usuario {} procediendo al checkout.", authentication.getName());
-        return "redirect:/pedido/crear";
+        return "redirect:/pedido/crear"; // O la URL de tu proceso de pedido
+    }
+    
+    private Map<String, Object> getCarritoResumenMap(HttpServletRequest request, HttpServletResponse response) {
+        Carrito carrito = carritoService.getCarrito();
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("carrito", carrito);
+
+        //  Crear el IWebExchange moderno
+        var webApp = org.thymeleaf.web.servlet.JakartaServletWebApplication.buildApplication(servletContext);
+        var webExchange = webApp.buildExchange(request, response);
+
+        //  Crear el contexto compatible con Thymeleaf 3.1+
+        WebContext context = new WebContext(webExchange, request.getLocale(), variables);
+
+        Map<String, Object> resumen = new HashMap<>();
+        int itemCount = carrito.getTotalUnidades();
+        resumen.put("itemCount", itemCount);
+
+        try {
+            Set<String> fragmentSelectors = new HashSet<>();
+            fragmentSelectors.add("items");
+            String carritoHtml = templateEngine.process("fragments/carrito", fragmentSelectors, context);
+            resumen.put("carritoHtml", carritoHtml);
+        } catch (Exception e) {
+            logger.error("Error al procesar el fragmento del carrito: {}", e.getMessage(), e);
+            resumen.put("carritoHtml", "<div class='alert alert-danger m-3'>Error al renderizar los items del carrito.</div>");
+        }
+
+        return resumen;
     }
 
-    // --- Método auxiliar para generar el resumen ---
-     private Map<String, Object> getCarritoResumenMap(HttpServletRequest request, HttpServletResponse response) {
-         Carrito carrito = carritoService.getCarrito();
-         final Map<String, Object> variables = new HashMap<>();
-         variables.put("carrito", carrito);
-
-         // ✅ USA SpringWebContext
-         final SpringWebContext context = new SpringWebContext(
-                                             request,
-                                             response,
-                                             servletContext,
-                                             request.getLocale(),
-                                             variables,
-                                             applicationContext); // Pasa el ApplicationContext
-
-         Map<String, Object> resumen = new HashMap<>();
-         int itemCount = carrito.getTotalUnidades();
-         resumen.put("itemCount", itemCount);
-         String carritoHtml = ""; // Inicializa
-
-         try {
-             Set<String> fragmentSelectors = new HashSet<>();
-             fragmentSelectors.add("items"); // Nombre del fragmento
-             // Intenta procesar siempre, el th:if dentro del fragmento maneja el caso vacío
-             carritoHtml = templateEngine.process("fragments/carrito", fragmentSelectors, context);
-             resumen.put("carritoHtml", carritoHtml);
-
-             // Log solo si no está vacío para claridad
-             if (itemCount > 0) {
-                logger.debug("Procesando fragmento HTML para carrito con {} items.", itemCount);
-             } else {
-                 logger.debug("Procesado fragmento HTML para carrito vacío.");
-             }
-
-         } catch (Exception e) {
-             logger.error("Error crítico al procesar el fragmento del carrito: {}", e.getMessage(), e);
-             // Devuelve un error HTML claro si falla el renderizado
-             resumen.put("carritoHtml", "<div class='alert alert-danger m-3'>Error al renderizar el carrito. Intente recargar la página.</div>");
-             // Asegúrate que itemCount sea 0 si falla el renderizado completo
-             resumen.put("itemCount", 0);
-         }
-
-         return resumen;
-     }
+     
 }
