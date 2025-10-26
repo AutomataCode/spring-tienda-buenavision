@@ -15,7 +15,6 @@ public class Cliente {
     private Integer idCliente;
 
     // Esta es la clave de la relación bidireccional
-    // Esta entidad "posee" la columna 'id_usuario'
     @OneToOne
     @JoinColumn(name = "id_usuario", unique = true)
     private Usuario usuario;

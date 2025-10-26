@@ -42,7 +42,7 @@
                     <span th:text="'S/ ' + ${#numbers.formatDecimal(carrito.getSubtotalTotal(), 1, 2)}"></span>
                 </div>
                 <div class="d-flex justify-content-between">
-                     <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarrito()">Vaciar Carrito</button> <a href="" class="btn btn-success">Proceder al Pedido</a>
+                     <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarrito()">Vaciar Carrito</button> <a th:href="@{/pedido/crear}" class="btn btn-success">Proceder al Pedido</a>
                 </div>
                
             </div>
