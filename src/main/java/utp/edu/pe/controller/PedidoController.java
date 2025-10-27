@@ -1,8 +1,10 @@
 package utp.edu.pe.controller;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +27,8 @@ import utp.edu.pe.service.PedidoService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -160,4 +164,50 @@ public class PedidoController {
 
         return "pedido/confirmacion-pedido"; // Nombre de la vista de confirmación
     }
+    
+    
+    @GetMapping("/mis-pedidos")
+    public String verMisPedidos(
+            Model model,
+            @AuthenticationPrincipal Usuario usuario, // <-- Tu patrón
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+
+        // Pasa el usuario directamente al servicio
+        List<Pedido> pedidos = pedidoService.findByUsuarioAndFechas(usuario, fechaInicio, fechaFin);
+
+        model.addAttribute("pedidos", pedidos);
+        model.addAttribute("fechaInicio", fechaInicio);
+        model.addAttribute("fechaFin", fechaFin);
+
+        return "pedido/mis-pedidos"; // La nueva vista
+    }
+
+    @GetMapping("/mis-pedidos/detalle/{id}")
+    public String verDetallePedido(@PathVariable("id") Long pedidoId,
+                                   Model model,
+                                   @AuthenticationPrincipal Usuario usuario) { // <-- Tu patrón
+        
+        if (usuario == null) {
+            return "redirect:/login";
+        }
+
+        // El servicio se encarga de todo: buscar Y validar que te pertenece
+        Optional<Pedido> pedidoOpt = pedidoService.findByIdAndUsuario(pedidoId, usuario);
+
+        if (pedidoOpt.isEmpty()) {
+            logger.warn("Usuario ID {} intentó ver detalle de pedido ID {} que no le pertenece o no existe.", usuario.getIdUsuario(), pedidoId);
+            return "redirect:/mis-pedidos?error=noencontrado";
+        }
+
+        model.addAttribute("pedido", pedidoOpt.get());
+        return "pedido/detalle-pedido"; // La nueva vista de detalle
+    }
+    
+    
+ 
 }

@@ -26,7 +26,9 @@ import utp.edu.pe.repository.ProductoRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID; // Para generar número de pedido
@@ -51,7 +53,7 @@ public class PedidoServiceImpl implements PedidoService {
     private CarritoService carritoService; // Para obtener el carrito de la sesión
 
     @Override
-    @Transactional // ¡MUY IMPORTANTE! Asegura atomicidad (todo o nada)
+    @Transactional //  Asegura atomicidad (todo o nada)
     public Pedido crearPedidoDesdeCarrito(Usuario usuario, String direccionEntrega, String observacionesCliente)
             throws StockInsuficienteException, IllegalStateException {
 
@@ -163,5 +165,35 @@ public class PedidoServiceImpl implements PedidoService {
         // Ejemplo simple: Prefijo + parte de UUID
         return "PED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Pedido> findByUsuarioAndFechas(Usuario usuario, LocalDate fechaInicio, LocalDate fechaFin) {
+		//  Obtener Cliente desde Usuario
+        Cliente cliente = clienteRepository.findByUsuario_IdUsuario(usuario.getIdUsuario())
+                .orElseThrow(() -> new IllegalStateException("Cliente no asociado a usuario ID: " + usuario.getIdUsuario()));
+
+        //Convertir fechas
+        LocalDateTime inicio = (fechaInicio != null) ? fechaInicio.atStartOfDay() : null;
+        LocalDateTime fin = (fechaFin != null) ? fechaFin.atTime(LocalTime.MAX) : null;
+
+        // Llamar al repositorio con el ID del cliente 
+        return pedidoRepository.findByClienteIdAndFechas(cliente.getIdCliente(), inicio, fin);
+	}
+
+	@Override
+	public Optional<Pedido> findByIdAndUsuario(Long pedidoId, Usuario usuario) {
+		// 1. Obtener Cliente desde Usuario
+        Optional<Cliente> clienteOpt = clienteRepository.findByUsuario_IdUsuario(usuario.getIdUsuario());
+
+        // Si no hay cliente, no puede tener pedidos.
+        if (clienteOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        
+        // 2. Llamar al repositorio con el ID del pedido y el ID del cliente
+        return pedidoRepository.findByIdAndClienteId(pedidoId, clienteOpt.get().getIdCliente());
+	}
+
 
 }

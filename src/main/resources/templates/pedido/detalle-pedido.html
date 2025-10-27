@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::body}, _, _)}">
+
+<head>
+    <title th:text="|Detalle Pedido #${pedido.idPedido} - Tienda Buena Visión|">Detalle Pedido</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <section class="container py-5">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                
+                <a th:href="@{/pedido/mis-pedidos}" class="btn btn-outline-dark mb-3">
+                    <i class="fas fa-arrow-left"></i> Volver a Mis Pedidos
+                </a>
+
+                <h1 class="h2" th:text="|Detalle del Pedido #${pedido.idPedido}|">Detalle del Pedido #123</h1>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <h5 class="card-title">Información General</h5>
+                                <p class="mb-1"><strong>Fecha de Pedido:</strong> <span th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy HH:mm')}"></span></p>
+                                <p class="mb-1"><strong>Dirección de Envío:</strong> <span th:text="${pedido.direccionEntrega}"></span></p>
+                                <p class="mb-0"><strong>Cliente:</strong> <span th:text="${pedido.cliente.nombre} + ' ' + ${pedido.cliente.apellido}"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="card-title">Estado y Total</h5>
+                                <p class="mb-1"><strong>Estado:</strong>
+                                    <span th:text="${pedido.estado.name()}"
+                                          class="badge"
+                                          th:classappend="${pedido.estado.name() == 'PENDIENTE' ? 'bg-warning text-dark' : 
+                                                           (pedido.estado.name() == 'COMPLETADO' ? 'bg-success' : 
+                                                           (pedido.estado.name() == 'CANCELADO' ? 'bg-danger' : 'bg-secondary'))}">
+                                    </span>
+                                </p>
+                                <p class="h4 text-success fw-bold mb-0"><strong>Total Pagado:</strong> <span th:text="|S/ ${#numbers.formatDecimal(pedido.total, 1, 2)}|"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Productos en este Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">Precio Unit.</th>
+                                        <th scope="col" class="text-center">Cantidad</th>
+                                        <th scope="col" class="text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="detalle : ${pedido.detalles}">
+                                        <td th:text="${detalle.producto.nombre}">Nombre Producto</td>
+                                        <td th:text="|S/ ${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)}|">S/ 50.00</td>
+                                        <td class="text-center" th:text="${detalle.cantidad}">2</td>
+                                        <td class="text-end" th:text="|S/ ${#numbers.formatDecimal(detalle.subtotal, 1, 2)}|">S/ 100.00</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fw-bold">
+                                        <td colspan="3" class="text-end h5">Total:</td>
+                                        <td class="text-end h5" th:text="|S/ ${#numbers.formatDecimal(pedido.total, 1, 2)}|">S/ 100.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>

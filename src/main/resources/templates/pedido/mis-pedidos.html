@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::body}, _, _)}">
+
+<head>
+    <title>Mis Pedidos - Tienda Buena Visión</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <section class="container py-5">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="h2">Mis Pedidos</h1>
+                <p>Aquí puedes ver el historial de tus pedidos.</p>
+
+                <div class="card shadow-sm mb-4" style="background-color: #f8f9fa;">
+                    <div class="card-body">
+                        <h5 class="card-title">Filtrar por Fecha</h5>
+                        <form th:action="@{/pedido/mis-pedidos}" method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="fechaInicio" class="form-label">Desde:</label>
+                                <input type="date" class="form-control" id="fechaInicio" name="fechaInicio" th:value="${fechaInicio}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fechaFin" class="form-label">Hasta:</label>
+                                <input type="date" class="form-control" id="fechaFin" name="fechaFin" th:value="${fechaFin}">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end mt-3 mt-md-0">
+                                <button type="submit" class="btn btn-success me-2">
+                                    <i class="fas fa-filter"></i> Filtrar
+                                </button>
+                                <a th:href="@{/pedido/mis-pedidos}" class="btn btn-outline-secondary">Limpiar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:if="${param.error == 'noencontrado'}" class="alert alert-danger" role="alert">
+                    El pedido que intentas ver no existe o no te pertenece.
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col"># Pedido</th>
+                                        <th scope="col">Fecha</th>
+                                        <th scope="col">Estado</th>
+                                        <th scope="col">Total</th>
+                                        <th scope="col" class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${pedidos.isEmpty()}">
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            No has realizado ningún pedido.
+                                        </td>
+                                    </tr>
+                                    <tr th:each="pedido : ${pedidos}">
+                                        <td class="fw-bold" th:text="${pedido.idPedido}">123</td>
+                                        <td th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:30</td>
+                                        <td>
+                                            <span th:text="${pedido.estado.name()}"
+                                                  class="badge"
+                                                  th:classappend="${pedido.estado.name() == 'PENDIENTE' ? 'bg-warning text-dark' : 
+                                                                   (pedido.estado.name() == 'COMPLETADO' ? 'bg-success' : 
+                                                                   (pedido.estado.name() == 'CANCELADO' ? 'bg-danger' : 'bg-secondary'))}">
+                                                PENDIENTE
+                                            </span>
+                                        </td>
+                                        <td th:text="|S/ ${#numbers.formatDecimal(pedido.total, 1, 2)}|">S/ 150.00</td>
+                                        <td class="text-center">
+                                            <a th:href="@{/pedido/mis-pedidos/detalle/{id}(id=${pedido.idPedido})}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-eye"></i> Ver Detalle
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>
