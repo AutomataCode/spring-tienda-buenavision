@@ -17,12 +17,12 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pedido")
-    private Long idPedido; // Usar Long para IDs es generalmente preferible
+    private Long idPedido;  
 
     @Column(name = "numero_pedido", unique = true, nullable = false, length = 20)
     private String numeroPedido;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Carga perezosa es usualmente mejor
+    @ManyToOne(fetch = FetchType.LAZY)  
     @JoinColumn(name = "id_cliente", nullable = false)
     private Cliente cliente;
 
@@ -46,7 +46,7 @@ public class Pedido {
     private BigDecimal descuento;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal igv; // Podría calcularse, pero guardarlo simplifica consultas
+    private BigDecimal igv;  
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal total;

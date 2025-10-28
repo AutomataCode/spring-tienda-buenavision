@@ -14,13 +14,17 @@ import java.util.Optional;
 public interface ProductoService {
 	
 	
-	 // CRUD
+	  
     Producto save(Producto producto);
     List<Producto> findAll();
     Page<Producto> findAll(Pageable pageable);
     Optional<Producto> findById(Long id);
     Optional<Producto> findBySku(String sku);
     void deleteById(Long id);
+    
+    void softDelete(Long id);
+    Producto saveAdmin(Producto producto, Usuario adminUsuario);
+    
     
     // Búsquedas
     List<Producto> findByNombre(String nombre);
@@ -66,4 +70,9 @@ public interface ProductoService {
     List<Producto> findTopSellingProducts(Pageable pageable);
     
     */
+    
+    
+    
+    
+    
 }

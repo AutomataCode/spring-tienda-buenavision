@@ -36,12 +36,12 @@ public class CategoriaProducto {
 	    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
 	    private List<Producto> productos = new ArrayList<>();
 	    
-	    // Constructores
+ 
 	    public CategoriaProducto() {
 	        this.fechaCreacion = LocalDateTime.now();
 	    }
 	    
-	    // Getters y Setters
+ 
 	    public Long getIdCategoria() { return idCategoria; }
 	    public void setIdCategoria(Long idCategoria) { this.idCategoria = idCategoria; }
 	    

@@ -53,7 +53,7 @@ public class PedidoServiceImpl implements PedidoService {
     private CarritoService carritoService; // Para obtener el carrito de la sesión
 
     @Override
-    @Transactional //  Asegura atomicidad (todo o nada)
+    @Transactional 
     public Pedido crearPedidoDesdeCarrito(Usuario usuario, String direccionEntrega, String observacionesCliente)
             throws StockInsuficienteException, IllegalStateException {
 
@@ -151,18 +151,17 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional(readOnly = true)
     public List<Pedido> findByClienteId(Integer idCliente) {
-        // Necesitas un Cliente objeto o buscar por ID directamente si ClienteRepository lo permite
-         Cliente cliente = new Cliente(); // Forma incorrecta, deberías buscar el cliente
+        // Necesitas un Cliente objeto o buscar por ID 
+         Cliente cliente = new Cliente();
          cliente.setIdCliente(idCliente);
-         // O mejor, modificar PedidoRepository para buscar por cliente ID
-         // return pedidoRepository.findByCliente_IdCliente(idCliente);
-         return pedidoRepository.findByCliente(cliente); // Requiere buscar el cliente primero
+
+         return pedidoRepository.findByCliente(cliente); 
     }
 
 
     // Método simple para generar un número único (puedes mejorarlo)
     private String generarNumeroPedidoUnico() {
-        // Ejemplo simple: Prefijo + parte de UUID
+    
         return "PED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
@@ -183,15 +182,15 @@ public class PedidoServiceImpl implements PedidoService {
 
 	@Override
 	public Optional<Pedido> findByIdAndUsuario(Long pedidoId, Usuario usuario) {
-		// 1. Obtener Cliente desde Usuario
+		//  Obtener Cliente desde Usuario
         Optional<Cliente> clienteOpt = clienteRepository.findByUsuario_IdUsuario(usuario.getIdUsuario());
 
-        // Si no hay cliente, no puede tener pedidos.
+
         if (clienteOpt.isEmpty()) {
             return Optional.empty();
         }
         
-        // 2. Llamar al repositorio con el ID del pedido y el ID del cliente
+    
         return pedidoRepository.findByIdAndClienteId(pedidoId, clienteOpt.get().getIdCliente());
 	}
 

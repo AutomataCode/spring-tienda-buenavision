@@ -50,10 +50,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
 			// Spring Security agrega el prefijo "ROLE_"
 			if (authority.getAuthority().equals("ROLE_ADMIN")) {
-				targetUrl = "/admin/dashboard"; // ⬅️ Tu página de inicio para Admin
+				targetUrl = "/admin/productos"; //  inicio para Admin
 				break; // Termina el bucle
 			} else if (authority.getAuthority().equals("ROLE_VENDEDOR")) {
-				targetUrl = "/vendedor/home"; // ⬅️ Tu página de inicio para Vendedor
+				targetUrl = "/vendedor/home"; 
 				break; // Termina el bucle
 			}
 		}

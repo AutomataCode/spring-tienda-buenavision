@@ -23,7 +23,7 @@ public class Inventario {
     private TipoMovimientoInventario tipoMovimiento;
 
     @Column(nullable = false)
-    private Integer cantidad; // Cantidad que se movió (positiva para entrada/ajuste+, negativa para salida/ajuste-)
+    private Integer cantidad; 
 
     @Column(name = "stock_anterior", nullable = false)
     private Integer stockAnterior;
@@ -34,7 +34,7 @@ public class Inventario {
     @Column(name = "fecha_movimiento", nullable = false, updatable = false)
     private LocalDateTime fechaMovimiento;
 
-    // Relaciones opcionales para trazar el origen del movimiento
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pedido", nullable = true)
     private Pedido pedido;
@@ -48,14 +48,14 @@ public class Inventario {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario; // Usuario que realizó/registró el movimiento
+    private Usuario usuario; 
 
     @PrePersist
     protected void onCreate() {
         this.fechaMovimiento = LocalDateTime.now();
     }
 
-    // --- Constructores ---
+
     public Inventario() {}
 
     public Inventario(Producto producto, TipoMovimientoInventario tipoMovimiento, Integer cantidad,
@@ -73,8 +73,7 @@ public class Inventario {
     }
 
 
-    // --- Getters y Setters ---
-    // (Genera todos)
+
 
     public Long getIdInventario() { return idInventario; }
     public void setIdInventario(Long idInventario) { this.idInventario = idInventario; }

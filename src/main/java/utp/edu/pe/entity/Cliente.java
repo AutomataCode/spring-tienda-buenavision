@@ -14,7 +14,7 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idCliente;
 
-    // Esta es la clave de la relación bidireccional
+     
     @OneToOne
     @JoinColumn(name = "id_usuario", unique = true)
     private Usuario usuario;

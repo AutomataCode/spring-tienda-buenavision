@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::body}, _, _)}">
+<head>
+    <title th:text="${producto.idProducto == null ? 'Nuevo Producto' : 'Editar Producto'}">Formulario</title>
+</head>
+<body>
+    <section class="container py-5">
+        <div class="row">
+            <div class="col-lg-10 mx-auto"> <h1 class="h2" th:text="${producto.idProducto == null ? 'Crear Nuevo Producto' : 'Editar Producto'}"></h1>
+                <p>Completa todos los datos del producto.</p>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form th:action="@{/admin/productos/guardar}" th:object="${producto}" method="POST">
+                            <input type="hidden" th:field="*{idProducto}" />
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="sku" class="form-label">SKU (Código Único)</label>
+                                    <input type="text" class="form-control" th:field="*{sku}" id="sku" required 
+                                           th:readonly="${producto.idProducto != null}">
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">Nombre del Producto</label>
+                                    <input type="text" class="form-control" th:field="*{nombre}" id="nombre" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" th:field="*{descripcion}" id="descripcion" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="precioVenta" class="form-label">Precio Venta (S/)</label>
+                                    <input type="number" class="form-control" th:field="*{precioVenta}" id="precioVenta" step="0.01" min="0" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="precioCosto" class="form-label">Precio Costo (S/)</label>
+                                    <input type="number" class="form-control" th:field="*{precioCosto}" id="precioCosto" step="0.01" min="0">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="stockActual" class="form-label">Stock Actual</label>
+                                    <input type="number" class="form-control" th:field="*{stockActual}" id="stockActual" min="0" required>
+                                    <div class="form-text">Actualizar registra en inventario.</div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="stockMinimo" class="form-label">Stock Mínimo</label>
+                                    <input type="number" class="form-control" th:field="*{stockMinimo}" id="stockMinimo" min="0">
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h5 class="mb-3">Detalles y Atributos</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="categoria" class="form-label">Categoría</label>
+                                    <select class="form-select" th:field="*{categoria}" id="categoria" required>
+                                        <option th:each="cat : ${categorias}" th:value="${cat.idCategoria}" th:text="${cat.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="marca" class="form-label">Marca</label>
+                                    <select class="form-select" th:field="*{marca}" id="marca" required>
+                                        <option th:each="mar : ${marcas}" th:value="${mar.idMarca}" th:text="${mar.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="tipo" class="form-label">Tipo Producto</label>
+                                    <select class="form-select" th:field="*{tipo}" id="tipo" required>
+                                        <option th:each="t : ${tiposProducto}" th:value="${t}" th:text="${t.name()}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="forma" class="form-label">Forma Montura</label>
+                                    <select class="form-select" th:field="*{forma}" id="forma"> <option value="">(Ninguna)</option>
+                                        <option th:each="form : ${formas}" th:value="${form.idForma}" th:text="${form.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="material" class="form-label">Material Montura</label>
+                                    <select class="form-select" th:field="*{material}" id="material"> <option value="">(Ninguno)</option>
+                                        <option th:each="mat : ${materiales}" th:value="${mat.idMaterial}" th:text="${mat.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="genero" class="form-label">Género</label>
+                                    <select class="form-select" th:field="*{genero}" id="genero">
+                                        <option th:each="g : ${generos}" th:value="${g}" th:text="${g.name()}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="talla" class="form-label">Talla</label>
+                                    <select class="form-select" th:field="*{talla}" id="talla">
+                                        <option value="">(Ninguna)</option>
+                                        <option th:each="ta : ${tallasMontura}" th:value="${ta}" th:text="${ta.name()}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="color" class="form-label">Color</label>
+                                    <input type="text" class="form-control" th:field="*{color}" id="color">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="modelo" class="form-label">Modelo</label>
+                                    <input type="text" class="form-control" th:field="*{modelo}" id="modelo">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="estado" class="form-label">Estado</label>
+                                    <select class="form-select" th:field="*{estado}" id="estado" required>
+                                        <option th:each="est : ${estados}" th:value="${est}" th:text="${est.name()}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="imagenUrl" class="form-label">URL de la Imagen</label>
+                                    <input type="text" class="form-control" th:field="*{imagenUrl}" id="imagenUrl" placeholder="https://...">
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar Producto</button>
+                                <a th:href="@{/admin/productos}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

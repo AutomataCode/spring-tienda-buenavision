@@ -27,11 +27,11 @@ public class DetallePedido {
     @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioUnitario;
 
-    // Mapeamos la columna calculada por la BD. No la insertamos ni actualizamos desde JPA.
+    // Mapeamos la columna calculada por la BD. 
     @Column(precision = 10, scale = 2, insertable = false, updatable = false)
     private BigDecimal subtotal;
 
-    // --- Constructores ---
+ 
     public DetallePedido() {}
 
     public DetallePedido(Pedido pedido, Producto producto, Integer cantidad, BigDecimal precioUnitario) {
@@ -42,8 +42,7 @@ public class DetallePedido {
     }
 
 
-    // --- Getters y Setters ---
-    // (Genera todos, incluyendo para 'subtotal' aunque sea calculado por la BD)
+
     public Long getIdDetallePedido() { return idDetallePedido; }
     public void setIdDetallePedido(Long idDetallePedido) { this.idDetallePedido = idDetallePedido; }
     public Pedido getPedido() { return pedido; }
@@ -55,5 +54,5 @@ public class DetallePedido {
     public BigDecimal getPrecioUnitario() { return precioUnitario; }
     public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
     public BigDecimal getSubtotal() { return subtotal; }
-    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; } // JPA necesita el setter
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; } 
 }

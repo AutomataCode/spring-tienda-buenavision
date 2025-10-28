@@ -91,8 +91,7 @@ public class UsuarioServiceImpl implements UsuarioService{
     @Override
     public Usuario actualizar(Usuario usuario) {
         // Este método simplemente guarda.
-        // La lógica para actualizar (ej. verificar si la contraseña cambió)
-        // debe manejarse en el controlador o en un método de servicio más complejo.
+
         return usuarioRepository.save(usuario);
     }
 
@@ -113,7 +112,7 @@ public class UsuarioServiceImpl implements UsuarioService{
         usuario.setEstado(EstadoGeneral.ACTIVO); // Estado por defecto
         usuario.setFechaCreacion(java.time.LocalDateTime.now());
 
-        // 2. Crear el objeto Cliente
+        //  Crear el objeto Cliente
         Cliente cliente = new Cliente();
         cliente.setNombre(dto.getNombre());
         cliente.setApellido(dto.getApellido());
@@ -122,12 +121,12 @@ public class UsuarioServiceImpl implements UsuarioService{
         cliente.setTelefono(dto.getTelefono());
         cliente.setDireccion(dto.getDireccion());
         
-        // 3. ¡VINCULAR AMBOS OBJETOS!
-        // Esto es crucial para la relación bidireccional
+        // VINCULAR AMBOS OBJETOS
+
         usuario.setCliente(cliente);
         cliente.setUsuario(usuario);
 
-        // 4. Guardar
+        //  Guardar
         // Gracias a `cascade = CascadeType.ALL` en la entidad Usuario,
         // al guardar el 'usuario', JPA también guardará automáticamente el 'cliente'
         // y manejará la asignación de la clave foránea.

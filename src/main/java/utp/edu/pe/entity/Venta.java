@@ -43,10 +43,10 @@ public class Venta {
     @Column(name = "metodo_pago", nullable = false)
     private MetodoPago metodoPago;
 
-    // Vendedor que registró la venta
+ 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendedor_id", nullable = false)
-    private Usuario vendedor; // Asumiendo que el vendedor es un Usuario
+    private Usuario vendedor; 
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -66,8 +66,7 @@ public class Venta {
          }
     }
 
-    // --- Getters y Setters ---
-    // (Genera todos)
+ 
 
     public Long getIdVenta() { return idVenta; }
     public void setIdVenta(Long idVenta) { this.idVenta = idVenta; }

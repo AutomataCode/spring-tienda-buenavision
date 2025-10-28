@@ -88,7 +88,7 @@ public class Producto {
     @Column(name = "estado")
     private EstadoProducto estado = EstadoProducto.ACTIVO;
     
-    // Constructores
+ 
     public Producto() {
         this.fechaIngreso = LocalDateTime.now();
     }
@@ -165,7 +165,7 @@ public class Producto {
     public EstadoProducto getEstado() { return estado; }
     public void setEstado(EstadoProducto estado) { this.estado = estado; }
     
-    // Métodos de negocio
+ 
     public boolean tieneStockSuficiente(Integer cantidad) {
         return this.stockActual >= cantidad;
     }

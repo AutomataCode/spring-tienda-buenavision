@@ -34,13 +34,12 @@ public class MaterialMontura {
     @OneToMany(mappedBy = "material", fetch = FetchType.LAZY)
     private List<Producto> productos = new ArrayList<>();
     
-    // Constructores
+  
     public MaterialMontura() {
         this.fechaCreacion = LocalDateTime.now();
     }
     
-    // Getters y Setters
-    public Long getIdMaterial() { return idMaterial; }
+     public Long getIdMaterial() { return idMaterial; }
     public void setIdMaterial(Long idMaterial) { this.idMaterial = idMaterial; }
     
     public String getNombre() { return nombre; }

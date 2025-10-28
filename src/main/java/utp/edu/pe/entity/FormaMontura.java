@@ -32,13 +32,12 @@ public class FormaMontura {
     
     @OneToMany(mappedBy = "forma", fetch = FetchType.LAZY)
     private List<Producto> productos = new ArrayList<>();
-    
-    // Constructores
+  
     public FormaMontura() {
         this.fechaCreacion = LocalDateTime.now();
     }
     
-    // Getters y Setters
+
     public Long getIdForma() { return idForma; }
     public void setIdForma(Long idForma) { this.idForma = idForma; }
     

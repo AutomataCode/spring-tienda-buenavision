@@ -33,12 +33,11 @@ public class Marca {
     @OneToMany(mappedBy = "marca", fetch = FetchType.LAZY)
     private List<Producto> productos = new ArrayList<>();
     
-    // Constructores
+
     public Marca() {
         this.fechaCreacion = LocalDateTime.now();
     }
     
-    // Getters y Setters
     public Long getIdMarca() { return idMarca; }
     public void setIdMarca(Long idMarca) { this.idMarca = idMarca; }
     

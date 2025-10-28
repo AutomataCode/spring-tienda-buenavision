@@ -22,5 +22,5 @@ public class Carrito {
                     .map(CarritoItem::getSubtotal)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    // cálculos de IGV y Total aquí si es necesario
+   
 }

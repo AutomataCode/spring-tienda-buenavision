@@ -47,10 +47,7 @@ public class PedidoController {
     @Autowired
     private ClienteService clienteService; // Para obtener datos del cliente
 
-    /**
-     * Muestra el formulario de checkout con el resumen del carrito y datos del cliente.
-     * @AuthenticationPrincipal inyecta el Usuario autenticado directamente.
-     */
+
     @GetMapping("/crear")
     public String mostrarFormularioPedido(@AuthenticationPrincipal Usuario usuario, Model model, RedirectAttributes redirectAttributes) {
         Carrito carrito = carritoService.getCarrito();
@@ -121,7 +118,7 @@ public class PedidoController {
         } catch (IllegalStateException e) {
             logger.warn("Error de estado al intentar guardar pedido (ej. carrito vacío): {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Error: " + e.getMessage());
-             return "redirect:/catalogo"; // Si el carrito estaba vacío, mejor ir al catálogo
+             return "redirect:/catalogo"; 
         } catch (Exception e) {
             logger.error("Error inesperado al guardar el pedido", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error inesperado al procesar tu pedido. Inténtalo de nuevo.");

@@ -15,7 +15,7 @@ public class ProductoFilterDTO {
     private BigDecimal maxPrecio;
     private String searchTerm;
     
-    // Constructores
+    
     public ProductoFilterDTO() {}
     
     public ProductoFilterDTO(String tipo, String genero, Long marcaId, Long categoriaId, 
@@ -29,8 +29,7 @@ public class ProductoFilterDTO {
         this.minPrecio = minPrecio;
         this.maxPrecio = maxPrecio;
     }
-    
-    // Getters y Setters
+
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
     

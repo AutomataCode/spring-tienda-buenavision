@@ -43,8 +43,7 @@ public class CatalogoController {
 	        this.formaService = formaService;
 	        this.materialService = materialService;
 	    }
-	    
-	    // 🏠 PÁGINA PRINCIPAL DEL CATÁLOGO
+	
 	    @GetMapping
 	    public String catalogoPrincipal(@RequestParam(defaultValue = "0") int page,
 	                                   @RequestParam(defaultValue = "12") int size,
@@ -78,7 +77,7 @@ public class CatalogoController {
 	    }
 	 
 	    
-	    // 🔍 BÚSQUEDA DE PRODUCTOS
+	
 	    @GetMapping("/buscar")
 	    public String buscarProductos(@RequestParam String q,
 	                                 @RequestParam(defaultValue = "0") int page,
@@ -396,7 +395,7 @@ public class CatalogoController {
 	        return "catalogo/categoria-especifica";
 	    }
 	    
-	    // 🔧 MÉTODOS AUXILIARES
+
 	    private void cargarFiltrosDisponibles(Model model) {
 	        model.addAttribute("tiposProducto", TipoProducto.values());
 	        model.addAttribute("generos", Genero.values());

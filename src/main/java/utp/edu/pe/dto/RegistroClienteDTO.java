@@ -7,7 +7,7 @@ import utp.edu.pe.entity.enums.TipoDocumento;
 
 public class RegistroClienteDTO {
 	
-	// --- Datos de Usuario ---
+
     @NotEmpty(message = "El nombre de usuario es obligatorio")
     @Size(min = 4, max = 50, message = "El usuario debe tener entre 4 y 50 caracteres")
     private String username;
@@ -25,12 +25,12 @@ public class RegistroClienteDTO {
 
     // --- Datos de Cliente ---
     @NotEmpty(message = "El nombre es obligatorio")
-    private String nombre; // Nombre del cliente
+    private String nombre; 
 
     @NotEmpty(message = "El apellido es obligatorio")
-    private String apellido; // Apellido del cliente
+    private String apellido; 
 
-    private TipoDocumento tipoDocumento = TipoDocumento.DNI; // Valor por defecto
+    private TipoDocumento tipoDocumento = TipoDocumento.DNI; 
 
     @NotEmpty(message = "El número de documento es obligatorio")
     private String numeroDocumento;

@@ -26,7 +26,7 @@ public class CarritoItem {
         return precioUnitario.multiply(BigDecimal.valueOf(cantidad));
     }
 
-    // Es útil tener equals/hashCode basado en el ID del producto
+  
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -32,7 +32,7 @@ public class PublicController {
 	@Autowired
 	private ClienteService clienteService;
 
-    // Inyecta el codificador de contraseñas
+  
     @Autowired
     private PasswordEncoder passwordEncoder;
 	
@@ -56,18 +56,18 @@ public class PublicController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        // 1. Validaciones de @Valid (campos vacíos, email, etc.)
+   
         if (bindingResult.hasErrors()) {
         	return "public/registrar-usuario"; 
         }
 
-        // 2. Validación de Contraseña
+        //  Validación de Contraseña
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             bindingResult.rejectValue("confirmPassword", "error.dto", "Las contraseñas no coinciden");
             return "public/registrar-usuario"; 
         }
 
-        // 3. Validar duplicados (usa los métodos del servicio)
+        //  Validar duplicados (usa los métodos del servicio)
         if (usuarioService.existsByUsername(dto.getUsername())) {
             bindingResult.rejectValue("username", "error.dto", "El nombre de usuario ya está en uso");
             return "public/registrar-usuario"; 
@@ -84,12 +84,12 @@ public class PublicController {
            return "public/registrar-usuario"; 
         }
 
-        // --- Si todo está bien ---
+       
 
-        // 5. Llamar al servicio para registrar AMBOS
+        //  Llamar al servicio para registrar AMBOS
         usuarioService.registrarCliente(dto);
 
-        // 6. Redirigir al Login
+        // Redirigir al Login
         redirectAttributes.addFlashAttribute("registroExitoso", 
             "¡Cuenta creada exitosamente! Ya puedes iniciar sesión.");
         

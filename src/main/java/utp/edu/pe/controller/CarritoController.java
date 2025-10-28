@@ -21,23 +21,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-// Imports de Thymeleaf (¡Importante!)
+ 
 import org.thymeleaf.TemplateEngine;
- // <-- Este es el import clave para SB 3+
+ 
 import org.thymeleaf.context.WebContext;
 
-// Imports de Jakarta Servlet API (para request, response, context)
+ 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-// Imports de Java Util
+ 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-// Puedes quitar el import de Locale si usas request.getLocale() directamente
+ 
 
 @Controller
 @RequestMapping("/carrito")
@@ -55,9 +55,7 @@ public class CarritoController {
     private ServletContext servletContext;
 
     @Autowired
-    private ApplicationContext applicationContext; // Necesario para SpringWebContext
-
-    // --- Endpoints AJAX (Agregar, Actualizar, Eliminar, Vaciar) ---
+    private ApplicationContext applicationContext;  
 
     @PostMapping("/agregar/{productoId}")
     @ResponseBody
@@ -149,7 +147,7 @@ public class CarritoController {
          }
      }
 
-    // Endpoint GET /resumen
+     
     @GetMapping("/resumen")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getCarritoResumen(
@@ -166,7 +164,7 @@ public class CarritoController {
         }
     }
 
-    // Endpoint GET /checkout (sin cambios en la lógica principal)
+     
     @GetMapping("/checkout")
     public String irAlCheckout(RedirectAttributes redirectAttributes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -190,11 +188,11 @@ public class CarritoController {
         Map<String, Object> variables = new HashMap<>();
         variables.put("carrito", carrito);
 
-        //  Crear el IWebExchange moderno
+        //  Crear el IWebExchange 
         var webApp = org.thymeleaf.web.servlet.JakartaServletWebApplication.buildApplication(servletContext);
         var webExchange = webApp.buildExchange(request, response);
 
-        //  Crear el contexto compatible con Thymeleaf 3.1+
+        //  Crear el contexto 
         WebContext context = new WebContext(webExchange, request.getLocale(), variables);
 
         Map<String, Object> resumen = new HashMap<>();

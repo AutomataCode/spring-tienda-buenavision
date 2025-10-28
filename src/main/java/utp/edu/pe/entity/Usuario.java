@@ -55,7 +55,7 @@ public class Usuario implements UserDetails {
 	    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
 	    private Cliente cliente;
 
-	    // --- Constructores ---
+ 
 	    public Usuario() {
 	        super();
 	    }
@@ -117,12 +117,12 @@ public class Usuario implements UserDetails {
 
 	    @Override
 	    public boolean isAccountNonExpired() {
-	        return true; //puedes manejar lógica de expiración
+	        return true; // manejar lógica de expiración
 	    }
 
 	    @Override
 	    public boolean isAccountNonLocked() {
-	        return true; // puedes manejar lógica de bloqueo
+	        return true; //  manejar lógica de bloqueo
 	    }
 
 	    @Override

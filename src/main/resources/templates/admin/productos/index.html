@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::body}, _, _)}">
+<head>
+    <title>Gestión de Productos</title>
+</head>
+<body>
+    <section class="container py-5">
+        <h1 class="h2">Gestión de Productos e Inventario</h1>
+        <p>Aquí puedes crear, editar y actualizar el stock de los productos.</p>
+
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+        <div class="row mb-3">
+            <div class="col-md-4"><div class="card p-3 text-center"><h5 class="mb-0">Total Productos</h5> <span class="h3" th:text="${paginaProductos.totalElements}">0</span></div></div>
+            <div class="col-md-4"><div class="card p-3 text-center"><h5 class="mb-0">Productos Activos</h5> <span class="h3 text-success" th:text="${activeProducts}">0</span></div></div>
+            <div class="col-md-4"><div class="card p-3 text-center"><h5 class="mb-0">Sin Stock</h5> <span class="h3 text-danger" th:text="${outOfStockProducts}">0</span></div></div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <a th:href="@{/admin/productos/nuevo}" class="btn btn-success"><i class="fas fa-plus"></i> Crear Nuevo Producto</a>
+                <a th:href="@{/admin/productos/exportar-excel}" class="btn btn-outline-primary"><i class="fas fa-file-excel"></i> Exportar Inventario</a>
+                <form th:action="@{/admin/productos/importar-excel}" method="POST" enctype="multipart/form-data" class="d-flex">
+                    <input type="file" name="file" class="form-control form-control-sm me-2" accept=".xlsx" required>
+                    <button type="submit" class="btn btn-primary btn-sm" title="Importar stock (Col B=SKU, Col D=Nuevo Stock)"><i class="fas fa-file-upload"></i> Importar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>SKU</th>
+                                <th>Nombre</th>
+                                <th>Precio Venta</th> <th class="text-center">Stock Actual</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="prod : ${paginaProductos.content}">
+                                <td th:text="${prod.idProducto}">1</td>
+                                <td class="fw-bold" th:text="${prod.sku}">SKU-001</td>
+                                <td th:text="${prod.nombre}">Lentes Ray-Ban</td>
+                                <td th:text="|S/ ${#numbers.formatDecimal(prod.precioVenta, 1, 2)}|">S/ 250.00</td>
+                                <td class="text-center fw-bold" th:text="${prod.stockActual}" 
+                                    th:classappend="${prod.stockActual <= prod.stockMinimo ? 'text-danger' : 'text-success'}">50</td>
+                                <td>
+                                    <span th:text="${prod.estado.name()}" class="badge"
+                                          th:classappend="${prod.estado.name() == 'ACTIVO' ? 'bg-success' : 'bg-danger'}"></span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/admin/productos/editar/{id}(id=${prod.idProducto})}" class="btn btn-primary btn-sm me-1" title="Editar Producto"><i class="fas fa-edit"></i></a>
+                                    <form th:action="@{/admin/productos/eliminar/{id}(id=${prod.idProducto})}" method="POST" class="d-inline" onsubmit="return confirm('¿Desactivar este producto?');">
+                                        <button type="submit" class="btn btn-danger btn-sm" title="Desactivar" th:disabled="${prod.estado.name() == 'INACTIVO'}"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${paginaProductos.isEmpty()}">
+                                <td colspan="7" class="text-center text-muted">No se encontraron productos.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav th:replace="~{fragments/paginacion :: paginador(${paginaProductos}, '/admin/productos')}"></nav>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
