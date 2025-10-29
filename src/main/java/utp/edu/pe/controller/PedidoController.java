@@ -51,18 +51,15 @@ public class PedidoController {
     @GetMapping("/crear")
     public String mostrarFormularioPedido(@AuthenticationPrincipal Usuario usuario, Model model, RedirectAttributes redirectAttributes) {
         Carrito carrito = carritoService.getCarrito();
-
         if (usuario == null) {
             // Seguridad adicional por si se accede directamente sin estar logueado
              redirectAttributes.addFlashAttribute("error", "Debes iniciar sesión para crear un pedido.");
              return "redirect:/login";
         }
-
         if (carrito.getItems().isEmpty()) {
             redirectAttributes.addFlashAttribute("warning", "Tu carrito está vacío.");
             return "redirect:/catalogo";
         }
-
         // Obtener el cliente asociado al usuario logueado
         Optional<Cliente> clienteOpt = clienteService.findByUsuarioId(usuario.getIdUsuario());
         if (clienteOpt.isEmpty()) {
@@ -71,7 +68,6 @@ public class PedidoController {
              return "redirect:/catalogo"; // O a una página de error/perfil
         }
         Cliente cliente = clienteOpt.get();
-
         // Calcular totales (deberían coincidir con los del carrito, pero recalculamos por seguridad)
         BigDecimal subtotal = carrito.getSubtotalTotal();
         BigDecimal igv = subtotal.multiply(IGV_RATE).setScale(2, RoundingMode.HALF_UP);
@@ -82,7 +78,6 @@ public class PedidoController {
         model.addAttribute("subtotal", subtotal);
         model.addAttribute("igv", igv);
         model.addAttribute("total", total);
-
         // Nombre de la vista Thymeleaf
         return "pedido/formulario-pedido";
     }

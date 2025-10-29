@@ -39,11 +39,9 @@ public class InventarioExcelServiceImpl  implements InventarioExcelService{
 
 	@Override
 	public ByteArrayInputStream exportarInventarioExcel() throws IOException {
-String[] COLUMNAS = {"ID", "SKU", "Nombre", "Stock Actual", "Precio", "Estado"};
-        
+		String[] COLUMNAS = {"ID", "SKU", "Nombre", "Stock Actual", "Precio", "Estado"}; 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream();) {
             Sheet sheet = workbook.createSheet("Inventario");
-
             // Estilo de Cabecera
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
@@ -52,7 +50,6 @@ String[] COLUMNAS = {"ID", "SKU", "Nombre", "Stock Actual", "Precio", "Estado"};
             headerCellStyle.setFont(headerFont);
             headerCellStyle.setFillForegroundColor(IndexedColors.DARK_GREEN.getIndex());
             headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
             // Fila de Cabecera
             Row headerRow = sheet.createRow(0);
             for (int col = 0; col < COLUMNAS.length; col++) {
@@ -60,7 +57,6 @@ String[] COLUMNAS = {"ID", "SKU", "Nombre", "Stock Actual", "Precio", "Estado"};
                 cell.setCellValue(COLUMNAS[col]);
                 cell.setCellStyle(headerCellStyle);
             }
-
             // Llenar Datos
             List<Producto> productos = productoRepository.findAll(); // Trae todos
             int rowIdx = 1;
@@ -72,12 +68,10 @@ String[] COLUMNAS = {"ID", "SKU", "Nombre", "Stock Actual", "Precio", "Estado"};
                 row.createCell(3).setCellValue(producto.getStockActual());
                 row.createCell(4).setCellValue(producto.getPrecioCosto().doubleValue());
                 row.createCell(5).setCellValue(producto.getEstado().name());
-            }
-            
+            }           
             for(int i=0; i<COLUMNAS.length; i++) {
                 sheet.autoSizeColumn(i);
             }
-
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         }

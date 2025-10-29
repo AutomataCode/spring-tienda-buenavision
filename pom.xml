@@ -5,16 +5,16 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<!-- ****** CAMBIO AQUÍ ****** -->
+	
 		<version>3.3.13</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/> 
 	</parent>
 	<groupId>utp.edu.pe</groupId>
 	<artifactId>Tienda-BuenaVision</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Tienda-BuenaVision</name>
 	<description>Proyecto academico para la tienda monturas BuenaVision</description>
-	<!-- Mantenemos url, licenses, developers, scm como estaban -->
+
 	<url/>
 	<licenses>
 		<license/>
@@ -29,7 +29,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<!-- Java 21 es compatible con Spring Boot 3.3 -->
+		
 		<java.version>21</java.version>
 	</properties>
 	<dependencies>
@@ -38,7 +38,7 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-		<!-- Dependencias Externas (Mantenemos versiones) -->
+	
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -63,27 +63,27 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.16.1</version>
 		</dependency>
-        <!-- Necesaria si usas Apache Commons Collections -->
+   
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.4</version> <!-- Revisa la última versión si es necesario -->
+            <version>4.4</version>
         </dependency>
 
 
-		<!-- Dependencias de Spring Boot (Versión gestionada por el parent 3.3.4) -->
+	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId> <!-- Nota: webmvc es transitiva de web, usar web es más común -->
+			<artifactId>spring-boot-starter-web</artifactId> 
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
-			<!-- La versión es gestionada por Spring Boot -->
+		
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
