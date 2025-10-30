@@ -54,7 +54,7 @@ public class PedidoServiceImpl implements PedidoService {
     private DetallePedidoRepository detallePedidoRepository; 
     @Autowired
     private ProductoRepository productoRepository;
-    @Autowired
+    @Autowired	
     private InventarioRepository inventarioRepository;
     @Autowired
     private ClienteRepository clienteRepository; // Para obtener el cliente

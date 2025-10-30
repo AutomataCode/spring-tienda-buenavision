@@ -1,134 +1,171 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="https://www.thymeleaf.org" th:replace="layouts/base :: layout(~{::title},  ~{::body}, ~{::#detalleStyles},, ~{::#scriptsShop})">
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+	th:replace="layouts/base :: layout(~{::title},  ~{::body}, ~{::#detalleStyles},, ~{::#scriptsShop})">
 
 <head>
-	<title>Buena Vision</title>
+	<title>Buena Vision - Catálogo</title>
 </head>
 
 <body>
-	<!-- Start Content -->
 	<br>
 	<div class="row mb-5">
-	    <div class="col-12 text-center">
-	        <h1 class="display-4 mb-3" th:text="${titulo}">Nuestro Catálogo</h1>
-	        <p class="lead text-muted">Descubre nuestra exclusiva colección de monturas</p>
-	    </div>
+		<div class="col-12 text-center">
+			<h1 class="display-4 mb-3" th:text="${titulo}">Nuestro Catálogo</h1>
+			<p class="lead text-muted">Descubre nuestra exclusiva colección de monturas</p>
+		</div>
 	</div>
 	<div class="container py-5">
 		<div class="row">
 
 			<div class="col-lg-3">
-				<h1 class="h2 pb-4">Categories</h1>
+				<h1 class="h2 pb-4">Filtros</h1>
+
 				<ul class="list-unstyled templatemo-accordion">
+
+
 					<li class="pb-3">
-						<a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
+						<a class="collapsed d-flex justify-content-between h3 text-decoration-none">
 							Marcas
 							<i class="fa fa-fw fa-chevron-circle-down mt-1"></i>
 						</a>
 						<ul class="collapse show list-unstyled pl-3">
-							<li><a class="text-decoration-none" href="#"></a></li>
-							<li><a class="text-decoration-none" href="#"></a></li>
+							<li>
+								<a class.="text-decoration-none"
+									th:classappend="${selectedMarca == null} ? 'fw-bold' : 'text-decoration-none'"
+									th:href="@{/catalogo(tipo=${selectedTipo}, forma=${selectedForma}, material=${selectedMaterial})}">
+									Todas 
+								</a>
+							</li>
+							<li th:each="marca : ${listaMarcas}">
+								<a class="text-decoration-none" th:text="${marca.nombre}"
+									th:classappend="${marca.idMarca == selectedMarca} ? 'fw-bold text-success' : ''"
+									th:href="@{/catalogo(tipo=${selectedTipo}, marca=${marca.idMarca}, forma=${selectedForma}, material=${selectedMaterial})}">
+								</a>
+							</li>
 						</ul>
 					</li>
+
 					<li class="pb-3">
 						<a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
 							Formas
 							<i class="pull-right fa fa-fw fa-chevron-circle-down mt-1"></i>
 						</a>
-						<ul id="collapseTwo" class="collapse list-unstyled pl-3">
-							<li><a class="text-decoration-none" href="#"></a></li>
-							<li><a class="text-decoration-none" href="#"></a></li>
+						<ul id="collapseTwo" class="collapse show list-unstyled pl-3">
+							<li>
+								<a class.="text-decoration-none"
+									th:classappend="${selectedForma == null} ? 'fw-bold' : 'text-decoration-none'"
+									th:href="@{/catalogo(tipo=${selectedTipo}, marca=${selectedMarca}, material=${selectedMaterial})}">
+									 Todas 
+								</a>
+							</li>
+							<li th:each="forma : ${listaFormas}">
+								<a class="text-decoration-none" th:text="${forma.nombre}"
+									th:classappend="${forma.idForma == selectedForma} ? 'fw-bold text-success' : ''"
+									th:href="@{/catalogo(tipo=${selectedTipo}, marca=${selectedMarca}, forma=${forma.idForma}, material=${selectedMaterial})}">
+								</a>
+							</li>
 						</ul>
 					</li>
+
 					<li class="pb-3">
 						<a class="collapsed d-flex justify-content-between h3 text-decoration-none" href="#">
 							Material
 							<i class="pull-right fa fa-fw fa-chevron-circle-down mt-1"></i>
 						</a>
-						<ul id="collapseThree" class="collapse list-unstyled pl-3">
-							<li><a class="text-decoration-none" href="#"></a></li>
-							<li><a class="text-decoration-none" href="#"></a></li>
-							<li><a class="text-decoration-none" href="#"></a></li>
+						<ul id="collapseThree" class="collapse show list-unstyled pl-3">
+							<li>
+								<a class.="text-decoration-none"
+									th:classappend="${selectedMaterial == null} ? 'fw-bold' : 'text-decoration-none'"
+									th:href="@{/catalogo(tipo=${selectedTipo}, marca=${selectedMarca}, forma=${selectedForma})}">
+									 Todos 
+								</a>
+							</li>
+							<li th:each="material : ${listaMateriales}">
+								<a class="text-decoration-none" th:text="${material.nombre}"
+									th:classappend="${material.idMaterial == selectedMaterial} ? 'fw-bold text-success' : ''"
+									th:href="@{/catalogo(tipo=${selectedTipo}, marca=${selectedMarca}, forma=${selectedForma}, material=${material.idMaterial})}">
+								</a>
+							</li>
 						</ul>
 					</li>
 				</ul>
 			</div>
-
 			<div class="col-lg-9">
 				<div class="row">
 					<div class="col-md-6">
 						<ul class="list-inline shop-top-menu pb-3 pt-1">
 							<li class="list-inline-item">
-								<a class="h3 text-dark text-decoration-none mr-3" href="#">Todo</a>
+								<a class="h3 text-decoration-none mr-3"
+									th:classappend="${selectedTipo == null} ? 'text-success fw-bold' : 'text-dark'"
+									th:href="@{/catalogo(marca=${selectedMarca}, forma=${selectedForma}, material=${selectedMaterial})}">
+									Todo
+								</a>
 							</li>
 							<li class="list-inline-item">
-								<a class="h3 text-dark text-decoration-none mr-3" href="#">Oftalmicos</a>
+								<a class="h3 text-decoration-none mr-3"
+									th:classappend="${selectedTipo == 'OFTALMICO'} ? 'text-success fw-bold' : 'text-dark'"
+									th:href="@{/catalogo(tipo='OFTALMICO', marca=${selectedMarca}, forma=${selectedForma}, material=${selectedMaterial})}">
+									Oftálmicos
+								</a>
 							</li>
 							<li class="list-inline-item">
-								<a class="h3 text-dark text-decoration-none" href="#">Lentes de Sol</a>
+								<a class="h3 text-decoration-none"
+									th:classappend="${selectedTipo == 'SOLAR'} ? 'text-success fw-bold' : 'text-dark'"
+									th:href="@{/catalogo(tipo='SOLAR', marca=${selectedMarca}, forma=${selectedForma}, material=${selectedMaterial})}">
+									Lentes de Sol
+								</a>
 							</li>
 						</ul>
 					</div>
 					<div class="col-md-6 pb-4">
 						<div class="d-flex">
 							<select class="form-control">
-								<option>Featured</option>
-								<option>A to Z</option>
-								<option>Item</option>
+								<option>Ordenar por:</option>
+
 							</select>
 						</div>
 					</div>
 				</div>
-				<div class="row" th:if="${not productos.empty}">
+
+				<div class="row" th:unless="${#lists.isEmpty(productos)}">
 					<div th:each="producto:${productos}" class="col-md-4">
 						<div class="card mb-4 product-wap rounded-0 product-card">
-							
 
 							<div class="card rounded-0 position-relative">
-								<!-- Badge de Stock -->
-								                        <div class="position-absolute top-0 start-0 m-2">
-								                            <span th:if="${producto.stockActual == 0}" 
-								                                  class="badge bg-danger">Agotado</span>
-																  <span th:if="${producto.stockActual > 0 and producto.stockActual <= producto.stockMinimo}" 
-																        class="badge bg-warning text-dark">Últimas unidades</span>
-								                        </div>
-								
-								
+								<div class="position-absolute top-0 start-0 m-2">
+									<span th:if="${producto.stockActual == 0}" class="badge bg-danger">Agotado</span>
+									<span
+										th:if="${producto.stockActual > 0 and producto.stockActual <= producto.stockMinimo}"
+										class="badge bg-warning text-dark">Últimas unidades</span>
+								</div>
 								<img class="card-img rounded-0 img-fluid  product-image"
 									th:src="${producto.imagenUrl ?: '/images/producto-default.jpg'}">
-						
 							</div>
+
 							<div class="card-body">
 								<small class="text-muted mb-1" th:text="${producto.marca.nombre}"></small>
-
-								<!-- Nombre -->
 								<h6 class="card-title" th:text="${producto.nombre}"></h6>
-
-
 								<div class="mb-2">
-									<small class="text-muted d-block">
+									<small class="text-muted d-block" th:if="${producto.color}">
 										<i class="fas fa-palette me-1"></i>
 										<span th:text="${producto.color}"></span>
 									</small>
-									<small class="text-muted d-block">
+									<small class="text-muted d-block" th:if="${producto.talla}">
 										<i class="fas fa-ruler me-1"></i>
 										<span th:text="${producto.talla.descripcion}"></span>
 									</small>
 								</div>
-
-								<!-- Precio -->
 								<div class="price mb-2"
 									th:text="'S/ ' + ${#numbers.formatDecimal(producto.precioVenta, 1, 2)}">
 								</div>
-
-								<!-- Botones de Acción -->
 								<div class="mt-auto">
 									<a th:href="@{/catalogo/producto/} + ${producto.idProducto}"
 										class="btn btn-outline-success btn-sm w-100 mb-2">
 										<i class="fas fa-eye me-1"></i>Ver Detalle
 									</a>
 									<button th:if="${producto.stockActual > 0}" class="btn btn-success btn-sm w-100"
-									    th:onclick="|agregarAlCarrito(${producto.idProducto})|"> <i class="fas fa-cart-plus me-1"></i>Agregar al Carrito
+										th:onclick="|agregarAlCarrito(${producto.idProducto})|"> <i
+											class="fas fa-cart-plus me-1"></i>Agregar al Carrito
 									</button>
 									<button th:if="${producto.stockActual == 0}" class="btn btn-secondary btn-sm w-100"
 										disabled>
@@ -139,164 +176,50 @@
 						</div>
 					</div>
 				</div>
-				<!-- Paginación -->
-				             <div th:if="${totalPages > 1}" class="row mt-4">
-				                 <div class="col-12">
-				                     <nav aria-label="Paginación de productos">
-				                         <ul class="pagination justify-content-center">
-				                             <!-- Botón Anterior -->
-				                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
-				                                 <a class="page-link" 
-				                                    th:href="@{/catalogo(page=${currentPage - 1}, size=${12}, tipo=${selectedTipo})}">
-				                                     <i class="fas fa-chevron-left"></i>
-				                                 </a>
-				                             </li>
 
-				                             <!-- Páginas -->
-				                             <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}" 
-				                                 class="page-item" th:classappend="${page == currentPage} ? 'active' : ''">
-				                                 <a class="page-link" 
-				                                    th:href="@{/catalogo(page=${page}, size=${12}, tipo=${selectedTipo})}"
-				                                    th:text="${page + 1}"></a>
-				                             </li>
-
-				                             <!-- Botón Siguiente -->
-				                             <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
-				                                 <a class="page-link" 
-				                                    th:href="@{/catalogo(page=${currentPage + 1}, size=${12}, tipo=${selectedTipo})}">
-				                                     <i class="fas fa-chevron-right"></i>
-				                                 </a>
-				                             </li>
-				                         </ul>
-				                     </nav>
-				                 </div>
-				             </div>
-
-			</div>
-
-		</div>
-
-	</div>
-	</div>
-	<!-- End Content -->
-
-	<!-- Start Brands -->
-	<section class="bg-light py-5">
-		<div class="container my-4">
-			<div class="row text-center py-3">
-				<div class="col-lg-6 m-auto">
-					<h1 class="h1">Our Brands</h1>
-					<p>
-						Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-						Lorem ipsum dolor sit amet.
-					</p>
+				<div class="row" th:if="${#lists.isEmpty(productos)}">
+					<div class="col-12 text-center">
+						<h3 class="text-muted">No se encontraron productos</h3>
+						<p>Intenta con otros filtros.</p>
+						<a th:href="@{/catalogo}" class="btn btn-primary">Limpiar filtros</a>
+					</div>
 				</div>
-				<div class="col-lg-9 m-auto tempaltemo-carousel">
-					<div class="row d-flex flex-row">
-						<!--Controls-->
-						<div class="col-1 align-self-center">
-							<a class="h1" href="#multi-item-example" role="button" data-bs-slide="prev">
-								<i class="text-light fas fa-chevron-left"></i>
-							</a>
-						</div>
-						<!--End Controls-->
 
-						<!--Carousel Wrapper-->
-						<div class="col">
-							<div class="carousel slide carousel-multi-item pt-2 pt-md-0" id="multi-item-example"
-								data-bs-ride="carousel">
-								<!--Slides-->
-								<div class="carousel-inner product-links-wap" role="listbox">
+				<div th:if="${totalPages > 1}" class="row mt-4">
+					<div class="col-12">
+						<nav aria-label="Paginación de productos">
+							<ul class="pagination justify-content-center">
+								<li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+									<a class="page-link" th:href="@{/catalogo(page=${currentPage - 1}, size=${12}, 
+				                                        tipo=${selectedTipo}, marca=${selectedMarca}, 
+				                                        forma=${selectedForma}, material=${selectedMaterial})}">
+										<i class="fas fa-chevron-left"></i>
+									</a>
+								</li>
 
-									<!--First slide-->
-									<div class="carousel-item active">
-										<div class="row">
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_01.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_02.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_03.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_04.png" alt="Brand Logo"></a>
-											</div>
-										</div>
-									</div>
-									<!--End First slide-->
+								<li th:each="page : ${#numbers.sequence(0, totalPages - 1)}" class="page-item"
+									th:classappend="${page == currentPage} ? 'active' : ''">
+									<a class="page-link" th:href="@{/catalogo(page=${page}, size=${12}, 
+				                                        tipo=${selectedTipo}, marca=${selectedMarca}, 
+				                                        forma=${selectedForma}, material=${selectedMaterial})}"
+										th:text="${page + 1}"></a>
+								</li>
 
-									<!--Second slide-->
-									<div class="carousel-item">
-										<div class="row">
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_01.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_02.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_03.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_04.png" alt="Brand Logo"></a>
-											</div>
-										</div>
-									</div>
-									<!--End Second slide-->
-
-									<!--Third slide-->
-									<div class="carousel-item">
-										<div class="row">
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_01.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_02.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_03.png" alt="Brand Logo"></a>
-											</div>
-											<div class="col-3 p-md-5">
-												<a href="#"><img class="img-fluid brand-img"
-														src="assets/img/brand_04.png" alt="Brand Logo"></a>
-											</div>
-										</div>
-									</div>
-									<!--End Third slide-->
-
-								</div>
-								<!--End Slides-->
-							</div>
-						</div>
-						<!--End Carousel Wrapper-->
-
-						<!--Controls-->
-						<div class="col-1 align-self-center">
-							<a class="h1" href="#multi-item-example" role="button" data-bs-slide="next">
-								<i class="text-light fas fa-chevron-right"></i>
-							</a>
-						</div>
-						<!--End Controls-->
+								<li class="page-item"
+									th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+									<a class="page-link" th:href="@{/catalogo(page=${currentPage + 1}, size=${12}, 
+				                                        tipo=${selectedTipo}, marca=${selectedMarca}, 
+				                                        forma=${selectedForma}, material=${selectedMaterial})}">
+										<i class="fas fa-chevron-right"></i>
+									</a>
+								</li>
+							</ul>
+						</nav>
 					</div>
 				</div>
 			</div>
 		</div>
-	</section>
-
-
+	</div>
 </body>
 
 </html>

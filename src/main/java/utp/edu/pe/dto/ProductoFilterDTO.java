@@ -4,8 +4,10 @@ package utp.edu.pe.dto;
 
 import java.math.BigDecimal;
 
+import utp.edu.pe.entity.enums.TipoProducto;
+
 public class ProductoFilterDTO {
-    private String tipo;
+  
     private String genero;
     private Long marcaId;
     private Long categoriaId;
@@ -14,26 +16,45 @@ public class ProductoFilterDTO {
     private BigDecimal minPrecio;
     private BigDecimal maxPrecio;
     private String searchTerm;
-    
-    
+    private TipoProducto tipo;
+  
     public ProductoFilterDTO() {}
-    
-    public ProductoFilterDTO(String tipo, String genero, Long marcaId, Long categoriaId, 
-                            Long formaId, Long materialId, BigDecimal minPrecio, BigDecimal maxPrecio) {
-        this.tipo = tipo;
-        this.genero = genero;
-        this.marcaId = marcaId;
-        this.categoriaId = categoriaId;
-        this.formaId = formaId;
-        this.materialId = materialId;
-        this.minPrecio = minPrecio;
-        this.maxPrecio = maxPrecio;
-    }
+  
 
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+ 
     
-    public String getGenero() { return genero; }
+    public ProductoFilterDTO(String genero, Long marcaId, Long categoriaId, Long formaId, Long materialId,
+			BigDecimal minPrecio, BigDecimal maxPrecio, String searchTerm, TipoProducto tipo) {
+		super();
+		this.genero = genero;
+		this.marcaId = marcaId;
+		this.categoriaId = categoriaId;
+		this.formaId = formaId;
+		this.materialId = materialId;
+		this.minPrecio = minPrecio;
+		this.maxPrecio = maxPrecio;
+		this.searchTerm = searchTerm;
+		this.tipo = tipo;
+	}
+
+
+
+
+	public TipoProducto getTipo() {
+		return tipo;
+	}
+
+
+
+
+	public void setTipo(TipoProducto tipo) {
+		this.tipo = tipo;
+	}
+
+
+
+
+	public String getGenero() { return genero; }
     public void setGenero(String genero) { this.genero = genero; }
     
     public Long getMarcaId() { return marcaId; }

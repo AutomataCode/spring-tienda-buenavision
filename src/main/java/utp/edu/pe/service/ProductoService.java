@@ -5,6 +5,7 @@ package utp.edu.pe.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import utp.edu.pe.dto.ProductoFilterDTO;
 import utp.edu.pe.entity.*;
 import utp.edu.pe.entity.enums.*;
 
@@ -34,6 +35,8 @@ public interface ProductoService {
     Page<Producto> findByEstado(EstadoProducto estado, Pageable pageable);
     
     // Filtros
+    
+    Page<Producto> findByFilters(ProductoFilterDTO filter, Pageable pageable);
     List<Producto> findByTipo(TipoProducto tipo);
     Page<Producto> findByTipo(TipoProducto tipo, Pageable pageable);
     List<Producto> findByTipoAndGenero(TipoProducto tipo, Genero genero);

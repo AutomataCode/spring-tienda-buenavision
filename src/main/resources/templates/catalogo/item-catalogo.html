@@ -40,7 +40,7 @@
 	                           </ul>
 
 	                           <h6>Descripción:</h6>
-	                           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temp incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse. Donec condimentum elementum convallis. Nunc sed orci a diam ultrices aliquet interdum quis nulla.</p>
+							   <p th:text="${producto.descripcion}"></p>
 	                           <ul class="list-inline">
 	                               <li class="list-inline-item">
 	                                   <h6>Color :</h6>
@@ -49,18 +49,17 @@
 	                                   <p class="text-muted"><strong th:text="${producto.color}" ></strong></p>
 	                               </li>
 	                           </ul>
-
+					
 	                           <h6>Especificaciones:</h6>
 	                           <ul class="list-unstyled pb-3">
-	                               <li>Lorem ipsum dolor sit</li>
-	                               <li>Amet, consectetur</li>
-	                               <li>Adipiscing elit,set</li>
-	                               <li>Duis aute irure</li>
-	                               <li>Ut enim ad minim</li>
-	                               <li>Dolore magna aliqua</li>
-	                               <li>Excepteur sint</li>
+	                               <li  th:text="'Genero: '+${producto.genero}"></li>
+	                               <li th:text="'Talla: '+${producto.talla}"></li>
+	                               <li th:text="'Tipo: '+${producto.tipo}"></li>
+								   <li th:text="'Forma: '+${producto.forma.nombre}"></li>
+								   <li th:text="'Material: '+${producto.material.nombre}"></li>
+	                             
 	                           </ul>
-
+							
 							   <input type="hidden" id="product-id-hidden" th:value="${producto.idProducto}"> <div class="row">
 							       <div class="col-auto">
 							           <ul class="list-inline pb-3">

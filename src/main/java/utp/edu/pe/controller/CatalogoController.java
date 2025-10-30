@@ -45,32 +45,62 @@ public class CatalogoController {
 	    }
 	
 	    @GetMapping
-	    public String catalogoPrincipal(@RequestParam(defaultValue = "0") int page,
+	    public String catalogoPrincipal(
+	    		
+	    		
+	    		// --- Parámetros de filtro ---
+	            @RequestParam(required = false) String tipo,
+	            @RequestParam(required = false) Long marca,
+	            @RequestParam(required = false) Long forma,
+	            @RequestParam(required = false) Long material,
+	    								@RequestParam(defaultValue = "0") int page,
 	                                   @RequestParam(defaultValue = "12") int size,
-	                                   @RequestParam(required = false) String tipo,
+	                              
 	                                   Model model) {
-	        
-	        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
-	        Page<Producto> productosPage;
+	    	
+	    	
+	    	ProductoFilterDTO filter = new ProductoFilterDTO();
 	        
 	        if (tipo != null && !tipo.isEmpty()) {
-	            // Filtrar por tipo
-	            TipoProducto tipoEnum = TipoProducto.valueOf(tipo.toUpperCase());
-	            productosPage = productoService.findByTipo(tipoEnum, pageable);
-	            model.addAttribute("titulo", getTituloPorTipo(tipoEnum));
-	        } else {
-	            // Todos los productos activos
-	            productosPage = productoService.findActiveProducts(pageable);
-	            model.addAttribute("titulo", "Nuestro Catálogo");
+	            try {
+	                // Convertir el String "OFTALMICO" o "SOL" al Enum
+	                filter.setTipo(TipoProducto.valueOf(tipo.toUpperCase()));
+	            } catch (IllegalArgumentException e) {
+	                // Ignorar si el tipo es inválido (ej. "tipo=xyz")
+	            }
 	        }
+	        filter.setMarcaId(marca);
+	        filter.setFormaId(forma);
+	        filter.setMaterialId(material);
 	        
-	        model.addAttribute("productos", productosPage.getContent());
-	        model.addAttribute("currentPage", page);
-	        model.addAttribute("totalPages", productosPage.getTotalPages());
-	        model.addAttribute("totalItems", productosPage.getTotalElements());
-	        model.addAttribute("selectedTipo", tipo);
+	     //  Aplicar paginación
+	        Pageable pageable = PageRequest.of(page, size);
+
+	        //  Llamar al servicio con la especificación
+	        Page<Producto> paginaProductos = productoService.findByFilters(filter, pageable);
+
+	        //  Cargar datos para la vista (productos)
+	        model.addAttribute("productos", paginaProductos.getContent());
+	        model.addAttribute("currentPage", paginaProductos.getNumber());
+	        model.addAttribute("totalPages", paginaProductos.getTotalPages());
+
+	        //  Cargar listas para la barra lateral (los filtros)
+	        model.addAttribute("listaMarcas", marcaService.findAll());
+	        model.addAttribute("listaFormas", formaService.findAll());
+	        model.addAttribute("listaMateriales", materialService.findAll());
+
+	        //  Devolver los filtros seleccionados a la vista (para que los links/paginación sigan funcionando)
+	        model.addAttribute("selectedTipo", (tipo != null ? tipo.toUpperCase() : null));
+	        model.addAttribute("selectedMarca", marca);
+	        model.addAttribute("selectedForma", forma);
+	        model.addAttribute("selectedMaterial", material);
 	        
-	        cargarFiltrosDisponibles(model);
+	        // Poner título dinámico
+	        String titulo = "Nuestro Catálogo";
+	        if (filter.getTipo() == TipoProducto.OFTALMICO) titulo = "Lentes Oftálmicos";
+	        if (filter.getTipo() == TipoProducto.SOLAR) titulo = "Lentes de Sol";
+	        model.addAttribute("titulo", titulo);
+	        
 	        return "catalogo/index-catalogo";
 	        
 	        
@@ -107,7 +137,7 @@ public class CatalogoController {
 	    
 	 
 	    
-
+/*
 	    @GetMapping("/filtros")
 	    public String filtrarProductos(@ModelAttribute ProductoFilterDTO filtro,
 	                                  @RequestParam(defaultValue = "0") int page,
@@ -134,7 +164,7 @@ public class CatalogoController {
 	        if (filtro.getMaterialId() != null) {
 	            material = materialService.findById(filtro.getMaterialId()).orElse(null);
 	        }
-	        if (filtro.getTipo() != null && !filtro.getTipo().isEmpty()) {
+	        if (filtro.getTipo() != null && !filtro.getTipo().getDescripcion()) {
 	            tipo = TipoProducto.valueOf(filtro.getTipo().toUpperCase());
 	        }
 	        if (filtro.getGenero() != null && !filtro.getGenero().isEmpty()) {
@@ -164,7 +194,7 @@ public class CatalogoController {
 	        cargarFiltrosDisponibles(model);
 	        return "catalogo/filtros";
 	    }
-
+*/
 	    @GetMapping("/producto/{id}")
 	    public String detalleProducto(@PathVariable Long id, Model model) {
 	        Optional<Producto> productoOpt = productoService.findById(id);
@@ -418,6 +448,8 @@ public class CatalogoController {
 	        return switch (tipo) {
 	            case SOLAR -> "Lentes de Sol";
 	            case OFTALMICO -> "Lentes Oftálmicos";
+	            case LENTESCONTACTO -> "Lentes de Conctacto";
+	            case ACCESORIOS -> "Accesorios";
 	        };
 	    }
 	    

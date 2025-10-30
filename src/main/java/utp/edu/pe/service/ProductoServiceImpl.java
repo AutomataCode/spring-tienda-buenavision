@@ -1,5 +1,6 @@
 package utp.edu.pe.service;
 
+import utp.edu.pe.dto.ProductoFilterDTO;
 import utp.edu.pe.entity.*;
 import utp.edu.pe.entity.enums.EstadoProducto;
 import utp.edu.pe.entity.enums.Genero;
@@ -7,6 +8,8 @@ import utp.edu.pe.entity.enums.TipoMovimientoInventario;
 import utp.edu.pe.entity.enums.TipoProducto;
 import utp.edu.pe.repository.InventarioRepository;
 import utp.edu.pe.repository.ProductoRepository;
+import utp.edu.pe.repository.ProductoSpecification;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -314,6 +317,13 @@ public class ProductoServiceImpl implements ProductoService {
 		movimiento.setVenta(null);
 
 		inventarioRepository.save(movimiento);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<Producto> findByFilters(ProductoFilterDTO filter, Pageable pageable) {
+		ProductoSpecification spec = new ProductoSpecification(filter);
+		return productoRepository.findAll(spec, pageable);
 	}
 
 	/*
