@@ -3,6 +3,8 @@ package utp.edu.pe.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +16,10 @@ import utp.edu.pe.entity.Inventario;
 import utp.edu.pe.entity.Pedido;
 import utp.edu.pe.entity.Producto;
 import utp.edu.pe.entity.Usuario;
+import utp.edu.pe.entity.Venta;
 import utp.edu.pe.entity.enums.EstadoPedido;
+import utp.edu.pe.entity.enums.EstadoVenta;
+import utp.edu.pe.entity.enums.MetodoPago;
 import utp.edu.pe.entity.enums.TipoMovimientoInventario;
 import utp.edu.pe.exception.StockInsuficienteException;
 
@@ -23,6 +28,7 @@ import utp.edu.pe.repository.DetallePedidoRepository;
 import utp.edu.pe.repository.InventarioRepository;
 import utp.edu.pe.repository.PedidoRepository;
 import utp.edu.pe.repository.ProductoRepository;
+import utp.edu.pe.repository.VentaRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,6 +45,9 @@ public class PedidoServiceImpl implements PedidoService {
     private static final Logger logger = LoggerFactory.getLogger(PedidoServiceImpl.class);
     private static final BigDecimal IGV_RATE = new BigDecimal("0.18"); // Tasa de IGV (18%)
 
+    @Autowired
+    private VentaRepository ventaRepository;
+    
     @Autowired
     private PedidoRepository pedidoRepository;
     @Autowired
@@ -159,7 +168,7 @@ public class PedidoServiceImpl implements PedidoService {
     }
 
 
-    // Método simple para generar un número único (puedes mejorarlo)
+    // Método simple para generar un número único  
     private String generarNumeroPedidoUnico() {
     
         return "PED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -194,5 +203,127 @@ public class PedidoServiceImpl implements PedidoService {
         return pedidoRepository.findByIdAndClienteId(pedidoId, clienteOpt.get().getIdCliente());
 	}
 
+	@Override
+	public Page<Pedido> findAllPedidosAdmin(Pageable pageable) {
+		return pedidoRepository.findAll(pageable);
+	}
+
+	@Override
+	public Optional<Pedido> findByIdAdmin(Long pedidoId) {
+
+		return pedidoRepository.findById(pedidoId);
+	}
+
+	@Override
+	public Pedido actualizarEstadoPedido(Long pedidoId, EstadoPedido nuevoEstado, Usuario adminUsuario)
+			throws IllegalStateException {
+		logger.info("Admin {} actualizando pedido ID {} al estado {}", adminUsuario.getEmail(), pedidoId, nuevoEstado);
+
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new IllegalStateException("Pedido no encontrado con ID: " + pedidoId));
+
+        //  No se puede modificar un pedido finalizado
+        if (pedido.getEstado() == EstadoPedido.ENTREGADO || pedido.getEstado() == EstadoPedido.CANCELADO) {
+            logger.warn("Intento de modificar pedido ya finalizado (ID: {})", pedidoId);
+            throw new IllegalStateException("El pedido ya está finalizado (ENTREGADO o CANCELADO) y no se puede modificar.");
+        }
+        
+        // No se puede cambiar al mismo estado
+        if (pedido.getEstado() == nuevoEstado) {
+            return pedido; // No hay nada que hacer
+        }
+
+
+        //  Pedido se marca como ENTREGADO
+        if (nuevoEstado == EstadoPedido.ENTREGADO) {
+            crearVentaDesdePedido(pedido, adminUsuario);
+        }
+
+        //  Pedido se marca como CANCELADO
+        if (nuevoEstado == EstadoPedido.CANCELADO) {
+            reponerStockPorCancelacion(pedido, adminUsuario);
+        }
+
+        // Actualizar y guardar el estado del pedido
+        pedido.setEstado(nuevoEstado);
+        return pedidoRepository.save(pedido);
+	}
+	
+	
+	private Venta crearVentaDesdePedido(Pedido pedido, Usuario adminUsuario) {
+        Venta venta = new Venta();
+        venta.setPedido(pedido);
+       
+        venta.setVendedor(adminUsuario);  
+        
+        venta.setNumeroVenta(generarNumeroVentaUnico());
+        
+        // Copiamos los totales del pedido
+        venta.setSubtotal(pedido.getSubtotal());
+        venta.setIgv(pedido.getIgv());
+        venta.setDescuento(pedido.getDescuento());
+        venta.setTotal(pedido.getTotal());
+        
+        venta.setEstado(EstadoVenta.COMPLETADA); // Estado final
+        
+      
+        // Asignamos uno por defecto. 
+        venta.setMetodoPago(MetodoPago.EFECTIVO); // O EFECTIVO, o POR_DEFINIR
+        
+        // Guardamos la Venta
+        Venta ventaGuardada = ventaRepository.save(venta);
+        
+        // Opcional: Actualizamos los registros de inventario (SALIDA)
+        // para vincularlos a esta venta.
+        List<Inventario> movimientos = inventarioRepository.findByPedido(pedido);
+        for (Inventario mov : movimientos) {
+            mov.setVenta(ventaGuardada);
+            inventarioRepository.save(mov);
+        }
+        
+        logger.info("Venta ID {} creada desde Pedido ID {}", ventaGuardada.getIdVenta(), pedido.getIdPedido());
+        return ventaGuardada;
+    }
+	
+	private void reponerStockPorCancelacion(Pedido pedido, Usuario adminUsuario) {
+        logger.warn("Cancelando pedido ID {} y reponiendo stock.", pedido.getIdPedido());
+        
+        for (DetallePedido detalle : pedido.getDetalles()) {
+            Producto producto = detalle.getProducto();
+            int cantidadDevuelta = detalle.getCantidad();
+            
+            int stockAntiguo = producto.getStockActual() != null ? producto.getStockActual() : 0;
+            int stockNuevo = stockAntiguo + cantidadDevuelta;
+            
+           //Devolver el stock al producto
+            producto.setStockActual(stockNuevo);
+            productoRepository.save(producto);
+            
+           // Registrar la ENTRADA en inventario
+            Inventario movimiento = new Inventario(
+                producto,
+                TipoMovimientoInventario.ENTRADA, // Entrada por devolución
+                cantidadDevuelta, // Positivo
+                stockAntiguo,
+                stockNuevo,
+                pedido, // Vinculado al pedido cancelado
+                null,   // Sin venta
+                "Devolución por Pedido #" + pedido.getNumeroPedido() + " CANCELADO",
+                adminUsuario 
+            );
+            inventarioRepository.save(movimiento);
+            
+            logger.info("Stock repuesto para Producto ID {}: {} unidades. Nuevo stock: {}", 
+                        producto.getIdProducto(), cantidadDevuelta, stockNuevo);
+        }
+    }
+	
+	private String generarNumeroVentaUnico() {
+    
+        return "VT-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
+    }
+	
+	
+	
 
 }

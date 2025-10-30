@@ -18,19 +18,15 @@ public interface UsuarioService {
   
     Usuario registrar(Usuario usuario);
 
-
     Optional<Usuario> findByResetToken(String resetToken);
-    
 
     List<Usuario> findByEstado(EstadoGeneral estado);
     
-
     List<Usuario> findAll();
     Optional<Usuario> findById(Integer id);
     Usuario actualizar(Usuario usuario);
     void deleteById(Integer id);
     
-
     Usuario registrarCliente(RegistroClienteDTO dto);
     
 

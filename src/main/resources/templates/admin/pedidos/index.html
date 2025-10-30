@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::body}, _, _)}">
+<head>
+    <title>Gestión de Pedidos</title>
+</head>
+<body>
+    <section class="container py-5">
+        <h1 class="h2">Gestión de Pedidos</h1>
+        <p>Administra todos los pedidos de los clientes.</p>
+
+        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th># Pedido</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="pedido : ${paginaPedidos.content}">
+                                <td class="fw-bold" th:text="${pedido.numeroPedido}">BV-123</td>
+                                <td th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td th:text="${pedido.cliente.nombre + ' ' + pedido.cliente.apellido}"></td>
+                                <td th:text="|S/ ${#numbers.formatDecimal(pedido.total, 1, 2)}|"></td>
+                                <td>
+                                    <span th:text="${pedido.estado.name()}"
+                                          class="badge"
+                                          th:classappend="${#strings.toString(pedido.estado) == 'PENDIENTE' ? 'bg-warning text-dark' :
+                                                           (#strings.toString(pedido.estado) == 'CONFIRMADO' ? 'bg-info' :
+                                                           (#strings.toString(pedido.estado) == 'PREPARADO' ? 'bg-primary' :
+                                                           (#strings.toString(pedido.estado) == 'ENTREGADO' ? 'bg-success' :
+                                                           (#strings.toString(pedido.estado) == 'CANCELADO' ? 'bg-danger' : 'bg-secondary'))))}">
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/admin/pedidos/detalle/{id}(id=${pedido.idPedido})}" 
+                                       class="btn btn-primary btn-sm">
+                                       <i class="fas fa-eye"></i> Gestionar
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${paginaPedidos.isEmpty()}">
+                                <td colspan="6" class="text-center text-muted">No se encontraron pedidos.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav th:replace="~{fragments/paginacion :: paginador(${paginaPedidos}, '/admin/pedidos')}"></nav>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>

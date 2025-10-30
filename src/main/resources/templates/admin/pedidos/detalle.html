@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::body}, _, _)}">
+<head>
+    <title th:text="|Gestionar Pedido #${pedido.numeroPedido}|">Gestionar Pedido</title>
+</head>
+<body>
+    <section class="container py-5">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                
+                <a th:href="@{/admin/pedidos}" class="btn btn-outline-dark mb-3">
+                    <i class="fas fa-arrow-left"></i> Volver al Listado
+                </a>
+
+                <h1 class="h2" th:text="|Gestionar Pedido #${pedido.numeroPedido}|"></h1>
+                
+                <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+                <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Actualizar Estado del Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:if="${pedido.estado.name() != 'ENTREGADO' && pedido.estado.name() != 'CANCELADO'}"
+                              th:action="@{/admin/pedidos/actualizar-estado}" method="POST" class="row g-3 align-items-end">
+                            
+                            <input type="hidden" name="pedidoId" th:value="${pedido.idPedido}" />
+                            
+                            <div class="col-md-6">
+                                <label for="nuevoEstado" class="form-label">Nuevo Estado</label>
+                                <select class="form-select" id="nuevoEstado" name="nuevoEstado">
+                                    <option th:each="estado : ${todosLosEstados}"
+                                            th:value="${estado}"
+                                            th:text="${estado.name()}"
+                                            th:selected="${estado == pedido.estado}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-save"></i> Actualizar Estado
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <small class="form-text text-muted">
+                                    <strong>ENTREGADO:</strong> Generará la Venta.<br>
+                                    <strong>CANCELADO:</strong> Devolverá los productos al stock.
+                                </small>
+                            </div>
+                        </form>
+                        
+                        <div th:if="${pedido.estado.name() == 'ENTREGADO' || pedido.estado.name() == 'CANCELADO'}"
+                             class="alert alert-info" role="alert">
+                             Este pedido ya ha sido <strong th:text="${pedido.estado.name()}"></strong> y no puede modificarse.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <h5 class="card-title">Información del Cliente</h5>
+                                <p class="mb-1"><strong>Cliente:</strong> <span th:text="${pedido.cliente.nombre} + ' ' + ${pedido.cliente.apellido}"></span></p>
+                                <p class="mb-1"><strong>Email:</strong> <span th:text="${pedido.cliente.usuario.email}"></span></p>
+                                <p class="mb-1"><strong>Dirección de Envío:</strong> <span th:text="${pedido.direccionEntrega}"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="card-title">Estado y Total</h5>
+                                <p class="mb-1"><strong>Fecha de Pedido:</strong> <span th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy HH:mm')}"></span></p>
+                                <p class="mb-1"><strong>Estado Actual:</strong>
+                                    <span th:text="${pedido.estado.name()}" class="badge bg-info"
+                                          th:classappend="${#strings.toString(pedido.estado) == 'PENDIENTE' ? 'bg-warning text-dark' :
+                                                           (#strings.toString(pedido.estado) == 'ENTREGADO' ? 'bg-success' :
+                                                           (#strings.toString(pedido.estado) == 'CANCELADO' ? 'bg-danger' : 'bg-primary'))}">
+                                    </span>
+                                </p>
+                                <p class="h4 text-success fw-bold mb-0"><strong>Total Pagado:</strong> <span th:text="|S/ ${#numbers.formatDecimal(pedido.total, 1, 2)}|"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Productos en este Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Producto</th>
+                                        <th scope="col">SKU</th>
+                                        <th scope="col">Precio Unit.</th>
+                                        <th scope="col" class="text-center">Cantidad</th>
+                                        <th scope="col" class="text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="detalle : ${pedido.detalles}">
+                                        <td th:text="${detalle.producto.nombre}">Nombre Producto</td>
+                                        <td th:text="${detalle.producto.sku}">SKU123</td>
+                                        <td th:text="|S/ ${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)}|"></td>
+                                        <td class="text-center" th:text="${detalle.cantidad}"></td>
+                                        <td class="text-end" th:text="|S/ ${#numbers.formatDecimal(detalle.precioUnitario.multiply(detalle.cantidad), 1, 2)}|"></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fw-bold">
+                                        <td colspan="4" class="text-end h5">Total:</td>
+                                        <td class="text-end h5 text-success" th:text="|S/ ${#numbers.formatDecimal(pedido.total, 1, 2)}|"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</body>
+</html>
