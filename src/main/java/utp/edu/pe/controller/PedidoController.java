@@ -4,7 +4,11 @@ import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +22,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import utp.edu.pe.dto.Carrito;
 import utp.edu.pe.entity.Cliente;
 import utp.edu.pe.entity.Pedido;
-import utp.edu.pe.entity.Usuario; // Necesitas la entidad Usuario
+import utp.edu.pe.entity.Usuario;  
+import utp.edu.pe.entity.Venta;
 import utp.edu.pe.exception.StockInsuficienteException;
 
 import utp.edu.pe.service.CarritoService;
 import utp.edu.pe.service.ClienteService;
+import utp.edu.pe.service.PdfService;
 import utp.edu.pe.service.PedidoService;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -40,12 +47,15 @@ public class PedidoController {
 
     @Autowired
     private PedidoService pedidoService;
+    
+    @Autowired
+    private PdfService pdfService;
 
     @Autowired
     private CarritoService carritoService;
 
     @Autowired
-    private ClienteService clienteService; // Para obtener datos del cliente
+    private ClienteService clienteService; 
 
 
     @GetMapping("/crear")
@@ -78,13 +88,11 @@ public class PedidoController {
         model.addAttribute("subtotal", subtotal);
         model.addAttribute("igv", igv);
         model.addAttribute("total", total);
-        // Nombre de la vista Thymeleaf
+       
         return "pedido/formulario-pedido";
     }
 
-    /**
-     * Procesa la creación del pedido desde el formulario.
-     */
+ 
     @PostMapping("/guardar")
     public String guardarPedido(@AuthenticationPrincipal Usuario usuario,
                               @RequestParam("direccionEntrega") String direccionEntrega,
@@ -99,16 +107,16 @@ public class PedidoController {
             Pedido nuevoPedido = pedidoService.crearPedidoDesdeCarrito(usuario, direccionEntrega, observacionesCliente);
             logger.info("Pedido #{} guardado exitosamente.", nuevoPedido.getNumeroPedido());
 
-            // Mensaje de éxito para la página de confirmación
+            
             redirectAttributes.addFlashAttribute("successMessage", "¡Tu pedido #" + nuevoPedido.getNumeroPedido() + " ha sido registrado con éxito!");
 
-            // Redirige a la página de confirmación con el ID del pedido
+            
             return "redirect:/pedido/confirmacion/" + nuevoPedido.getIdPedido();
 
         } catch (StockInsuficienteException e) {
             logger.warn("Error de stock al intentar guardar pedido: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Error al crear el pedido: " + e.getMessage());
-            // Vuelve al formulario de creación (la vista /pedido/crear mostrará el mensaje)
+ 
             return "redirect:/pedido/crear";
         } catch (IllegalStateException e) {
             logger.warn("Error de estado al intentar guardar pedido (ej. carrito vacío): {}", e.getMessage());
@@ -121,9 +129,7 @@ public class PedidoController {
         }
     }
 
-    /**
-     * Muestra la página de confirmación del pedido.
-     */
+ 
     @GetMapping("/confirmacion/{pedidoId}")
     public String mostrarConfirmacionPedido(@PathVariable Long pedidoId,
                                           @AuthenticationPrincipal Usuario usuario,
@@ -139,12 +145,12 @@ public class PedidoController {
         if (pedidoOpt.isEmpty()) {
             logger.warn("Intento de ver confirmación de pedido no existente: ID {}", pedidoId);
             redirectAttributes.addFlashAttribute("errorMessage", "El pedido solicitado no existe.");
-            return "redirect:/public"; // O a la página principal
+            return "redirect:/public";  
         }
 
         Pedido pedido = pedidoOpt.get();
 
-        // Verificar que el pedido pertenezca al usuario logueado
+        
         if (!pedido.getCliente().getUsuario().getIdUsuario().equals(usuario.getIdUsuario())) {
              logger.warn("Usuario ID {} intentó acceder a pedido ID {} de otro cliente.", usuario.getIdUsuario(), pedidoId);
              redirectAttributes.addFlashAttribute("errorMessage", "No tienes permiso para ver este pedido.");
@@ -152,7 +158,6 @@ public class PedidoController {
         }
 
         model.addAttribute("pedido", pedido);
-        // El mensaje de éxito se recibe vía flash attribute del método guardarPedido
 
         return "pedido/confirmacion-pedido"; // Nombre de la vista de confirmación
     }
@@ -161,34 +166,33 @@ public class PedidoController {
     @GetMapping("/mis-pedidos")
     public String verMisPedidos(
             Model model,
-            @AuthenticationPrincipal Usuario usuario, // <-- Tu patrón
+            @AuthenticationPrincipal Usuario usuario,  
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
 
         if (usuario == null) {
             return "redirect:/login";
         }
-
-        // Pasa el usuario directamente al servicio
+ 
         List<Pedido> pedidos = pedidoService.findByUsuarioAndFechas(usuario, fechaInicio, fechaFin);
 
         model.addAttribute("pedidos", pedidos);
         model.addAttribute("fechaInicio", fechaInicio);
         model.addAttribute("fechaFin", fechaFin);
 
-        return "pedido/mis-pedidos"; // La nueva vista
+        return "pedido/mis-pedidos";  
     }
 
     @GetMapping("/mis-pedidos/detalle/{id}")
     public String verDetallePedido(@PathVariable("id") Long pedidoId,
                                    Model model,
-                                   @AuthenticationPrincipal Usuario usuario) { // <-- Tu patrón
+                                   @AuthenticationPrincipal Usuario usuario) { 
         
         if (usuario == null) {
             return "redirect:/login";
         }
 
-        // El servicio se encarga de todo: buscar Y validar que te pertenece
+       
         Optional<Pedido> pedidoOpt = pedidoService.findByIdAndUsuario(pedidoId, usuario);
 
         if (pedidoOpt.isEmpty()) {
@@ -197,7 +201,47 @@ public class PedidoController {
         }
 
         model.addAttribute("pedido", pedidoOpt.get());
-        return "pedido/detalle-pedido"; // La nueva vista de detalle
+        return "pedido/detalle-pedido";  
+    }
+    
+    @GetMapping("/mis-pedidos/boleta/{pedidoId}")
+    public ResponseEntity<InputStreamResource> descargarBoleta(
+            @PathVariable("pedidoId") Long pedidoId,
+            @AuthenticationPrincipal Usuario usuario,
+            RedirectAttributes attributes) {
+        
+        if (usuario == null) {
+           
+            return ResponseEntity.status(401).build();
+        }
+
+        //   Validamos y buscamos la Venta
+        Optional<Venta> ventaOpt = pedidoService.findVentaByPedidoAndUsuario(pedidoId, usuario);
+
+        if (ventaOpt.isEmpty()) {
+            // Si no hay venta, no podemos generar PDF
+            return ResponseEntity.notFound().build();
+        }
+
+        Venta venta = ventaOpt.get();
+        
+        
+        String ruc = "10102739651";
+        String empresaNombre = "Buena Vision";
+
+        //   Generar el PDF
+        ByteArrayInputStream pdfBytes = pdfService.generarBoletaPdf(venta, ruc, empresaNombre);
+
+        //  Configurar la respuesta HTTP para la descarga
+        HttpHeaders headers = new HttpHeaders();
+        String filename = "boleta-" + venta.getNumeroVenta() + ".pdf";
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + filename);
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdfBytes));
     }
     
     

@@ -41,7 +41,7 @@ public class AdminPedidoController {
         Page<Pedido> paginaPedidos = pedidoService.findAllPedidosAdmin(pageable);
         
         model.addAttribute("paginaPedidos", paginaPedidos);
-        return "admin/pedidos/index"; // Nueva vista
+        return "admin/pedidos/index"; 
     }
 
   

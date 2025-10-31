@@ -322,6 +322,27 @@ public class PedidoServiceImpl implements PedidoService {
     
         return "VT-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
     }
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Venta> findVentaByPedidoAndUsuario(Long pedidoId, Usuario usuario) {
+		 
+        Optional<Pedido> pedidoOpt = this.findByIdAndUsuario(pedidoId, usuario);
+        
+        if (pedidoOpt.isEmpty()) {
+            logger.warn("Intento de ver boleta de pedido ajeno o inexistente. Usuario ID: {}, Pedido ID: {}", usuario.getIdUsuario(), pedidoId);
+            return Optional.empty(); // No le pertenece o no existe
+        }
+        
+        
+        if (pedidoOpt.get().getEstado() != EstadoPedido.ENTREGADO) {
+            logger.warn("Intento de ver boleta de pedido no entregado. Pedido ID: {}", pedidoId);
+            return Optional.empty(); // Aún no está entregado
+        }
+
+        
+        return ventaRepository.findByPedidoIdPedido(pedidoId);
+	}
 	
 	
 	

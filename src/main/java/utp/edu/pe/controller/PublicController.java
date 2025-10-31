@@ -51,7 +51,7 @@ public class PublicController {
 	
 	@PostMapping("/registro")
     public String procesarRegistro(
-            @Valid @ModelAttribute("registroDto") RegistroClienteDTO dto, // ⬅️ Usa el DTO
+            @Valid @ModelAttribute("registroDto") RegistroClienteDTO dto,  
             BindingResult bindingResult,
             Model model,
             RedirectAttributes redirectAttributes) {
@@ -84,12 +84,10 @@ public class PublicController {
            return "public/registrar-usuario"; 
         }
 
-       
 
-        //  Llamar al servicio para registrar AMBOS
         usuarioService.registrarCliente(dto);
 
-        // Redirigir al Login
+         
         redirectAttributes.addFlashAttribute("registroExitoso", 
             "¡Cuenta creada exitosamente! Ya puedes iniciar sesión.");
         

@@ -60,9 +60,7 @@ public class AdminProductoController {
     
     private static final Logger log = LoggerFactory.getLogger(AdminProductoController.class); // Logback
 
-    /**
-     Muestra la lista paginada de productos.
-     */
+   
     @GetMapping
     public String listarProductos(Model model,
                                   @RequestParam(defaultValue = "0") int page,
@@ -76,9 +74,7 @@ public class AdminProductoController {
         return "admin/productos/index"; // Nueva vista
     }
 
-    /**
-     * Muestra el formulario para crear un nuevo producto.
-     */
+   
     @GetMapping("/nuevo")
     public String mostrarFormularioNuevo(Model model) {
         model.addAttribute("producto", new Producto());
@@ -86,9 +82,7 @@ public class AdminProductoController {
         return "admin/productos/form"; // Nueva vista
     }
 
-    /**
-     * Muestra el formulario para editar un producto existente.
-     */
+  
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditar(@PathVariable Long id, Model model, RedirectAttributes attributes) {
         Optional<Producto> productoOpt = productoService.findById(id);
@@ -103,9 +97,7 @@ public class AdminProductoController {
         return "admin/productos/form";
     }
 
-    /**
-     * Guarda un producto (nuevo o editado).
-     */
+
     @PostMapping("/guardar")
     public String guardarProducto(@Valid @ModelAttribute("producto") Producto producto,
                                 BindingResult result,
@@ -136,9 +128,7 @@ public class AdminProductoController {
         return "redirect:/admin/productos";
     }
 
-    /**
-     *  Marca un producto como INACTIVO.
-     */
+
     @PostMapping("/eliminar/{id}")
     public String eliminarProducto(@PathVariable Long id, RedirectAttributes attributes) {
         try {
@@ -151,8 +141,7 @@ public class AdminProductoController {
         return "redirect:/admin/productos";
     }
 
-    // --- Endpoints de Apache POI ---
-
+   
     @GetMapping("/exportar-excel")
     public ResponseEntity<InputStreamResource> exportarExcel() throws IOException {
         ByteArrayInputStream in = inventarioExcelService.exportarInventarioExcel();
@@ -188,9 +177,7 @@ public class AdminProductoController {
         return "redirect:/admin/productos";
     }
 
-    /**
-     * Método auxiliar para cargar los datos de los <select>
-     */
+  
     private void cargarDatosSelect(Model model) {
         model.addAttribute("categorias", categoriaProductoService.findAll());
         model.addAttribute("marcas", marcaService.findAll());

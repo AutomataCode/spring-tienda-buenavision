@@ -24,8 +24,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     List<Pedido> findByEstado(EstadoPedido estado);
 
-    //  añadir métodos más complejos con @Query
-    //  buscar pedidos entre fechas, por cliente y estado, etc.
+ 
     
     
     @Query("SELECT p FROM Pedido p WHERE p.id = :id AND p.cliente.idCliente = :clienteId")

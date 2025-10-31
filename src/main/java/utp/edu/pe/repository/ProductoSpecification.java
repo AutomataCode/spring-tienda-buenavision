@@ -27,38 +27,35 @@ public class ProductoSpecification implements Specification<Producto> {
 	public Predicate toPredicate(Root<Producto> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 		List<Predicate> predicates = new ArrayList<>();
 
-        // --- Filtro base: Solo productos ACTIVOS ---
+        //  productos ACTIVOS ---
         predicates.add(cb.equal(root.get("estado"), EstadoProducto.ACTIVO));
 
         // --- Filtros Dinámicos ---
 
-        // Filtro por Tipo (OFTALMICO / SOL)
+        // Filtro por Tipo  
         if (filter.getTipo() != null) {
             predicates.add(cb.equal(root.get("tipo"), filter.getTipo()));
         }
 
         // Filtro por Marca
         if (filter.getMarcaId() != null) {
-            //                       root.get("marca") -> campo en Producto.java
-            //                       .get("idMarca")  -> campo en Marca.java
+ 
             predicates.add(cb.equal(root.get("marca").get("idMarca"), filter.getMarcaId()));
         }
 
         // Filtro por Forma
         if (filter.getFormaId() != null) {
-            //                       root.get("forma") -> campo en Producto.java
-            //                       .get("idFormaMontura") -> campo en FormaMontura.java
+ 
             predicates.add(cb.equal(root.get("forma").get("idForma"), filter.getFormaId()));
         }
 
         // Filtro por Material
         if (filter.getMaterialId() != null) {
-            //                       root.get("material") -> campo en Producto.java
-            //                       .get("idMaterialMontura") -> campo en MaterialMontura.java
+ 
             predicates.add(cb.equal(root.get("material").get("idMaterial"), filter.getMaterialId()));
         }
 
-        // (Aquí puedes añadir más filtros si quieres, como nombre o precio)
+        
         
         return cb.and(predicates.toArray(new Predicate[0]));
 	}

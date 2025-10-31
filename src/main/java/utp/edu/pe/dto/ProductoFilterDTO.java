@@ -78,7 +78,7 @@ public class ProductoFilterDTO {
     public String getSearchTerm() { return searchTerm; }
     public void setSearchTerm(String searchTerm) { this.searchTerm = searchTerm; }
     
-    // Métodos utilitarios
+   
     public boolean hasFiltros() {
         return tipo != null || genero != null || marcaId != null || 
                categoriaId != null || formaId != null || materialId != null ||

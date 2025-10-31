@@ -11,14 +11,14 @@ public class LoginController {
 	@GetMapping("/login")
     public String mostrarFormularioLogin() {
         
-        // Comprueba si el usuario ya está autenticado
+      
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
         // Si la autenticación es válida y no es el "usuario anónimo"
         if (authentication != null && authentication.isAuthenticated() && 
             !"anonymousUser".equals(authentication.getPrincipal())) {
             	
-            // Redirige al "home" (ajusta "/public" si tu home es otro)
+         
             return "redirect:/public"; 
         }
 

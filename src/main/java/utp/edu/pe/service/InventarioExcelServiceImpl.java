@@ -88,7 +88,7 @@ public class InventarioExcelServiceImpl  implements InventarioExcelService{
             int rowNumber = 0;
             while (rows.hasNext()) {
                 Row currentRow = rows.next();
-                if (rowNumber == 0) { // Omitir cabecera
+                if (rowNumber == 0) {  
                     rowNumber++;
                     continue;
                 }

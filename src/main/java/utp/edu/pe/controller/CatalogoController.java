@@ -48,7 +48,7 @@ public class CatalogoController {
 	    public String catalogoPrincipal(
 	    		
 	    		
-	    		// --- Parámetros de filtro ---
+	     
 	            @RequestParam(required = false) String tipo,
 	            @RequestParam(required = false) Long marca,
 	            @RequestParam(required = false) Long forma,
@@ -73,10 +73,10 @@ public class CatalogoController {
 	        filter.setFormaId(forma);
 	        filter.setMaterialId(material);
 	        
-	     //  Aplicar paginación
+	   
 	        Pageable pageable = PageRequest.of(page, size);
 
-	        //  Llamar al servicio con la especificación
+	        
 	        Page<Producto> paginaProductos = productoService.findByFilters(filter, pageable);
 
 	        //  Cargar datos para la vista (productos)
@@ -95,7 +95,7 @@ public class CatalogoController {
 	        model.addAttribute("selectedForma", forma);
 	        model.addAttribute("selectedMaterial", material);
 	        
-	        // Poner título dinámico
+	         
 	        String titulo = "Nuestro Catálogo";
 	        if (filter.getTipo() == TipoProducto.OFTALMICO) titulo = "Lentes Oftálmicos";
 	        if (filter.getTipo() == TipoProducto.SOLAR) titulo = "Lentes de Sol";
@@ -294,11 +294,11 @@ public class CatalogoController {
 	            TipoProducto tipoEnum = TipoProducto.valueOf(tipo.toUpperCase());
 	            productosPage = productoService.findByTipoAndGenero(tipoEnum, Genero.HOMBRE, pageable);
 	        } else {
-	            // Todos los productos para hombre
+	             
 	            List<Producto> productos = productoService.findWithFilters(
 	                null, Genero.HOMBRE, null, null, null, null, null, null
 	            );
-	            // Convertir a página manualmente
+	            
 	            int start = (int) pageable.getOffset();
 	            int end = Math.min((start + pageable.getPageSize()), productos.size());
 	            productosPage = new org.springframework.data.domain.PageImpl<>(
@@ -453,7 +453,7 @@ public class CatalogoController {
 	        };
 	    }
 	    
-	    // CLASE INTERNA PARA RANGOS DE PRECIO
+	 
 	    private static class RangoPrecio {
 	        private final String nombre;
 	        private final BigDecimal min;

@@ -2,7 +2,7 @@ package utp.edu.pe.controller;
 
 import utp.edu.pe.dto.Carrito;
 
-// Tus imports de DTO, Servicio, Entidades, etc.
+ 
 
 import utp.edu.pe.service.CarritoService;
 
@@ -10,7 +10,7 @@ import utp.edu.pe.service.CarritoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Imports de Spring Core y Web
+ 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
