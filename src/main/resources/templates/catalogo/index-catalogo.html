@@ -207,7 +207,7 @@
 
 								<li class="page-item"
 									th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
-									<a class="page-link" th:href="@{/catalogo(page=${currentPage + 1}, size=${12}, q=${q},
+									<a class="page-link" th:href="@{/catalogo(page=${currentPage + 1}, size=${12}, q=${q},		
 				                                        tipo=${selectedTipo}, marca=${selectedMarca}, 
 				                                        forma=${selectedForma}, material=${selectedMaterial})}">
 										<i class="fas fa-chevron-right"></i>
