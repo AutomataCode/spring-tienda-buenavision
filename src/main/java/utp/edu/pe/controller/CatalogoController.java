@@ -47,7 +47,7 @@ public class CatalogoController {
 	    @GetMapping
 	    public String catalogoPrincipal(
 	    		
-	    		
+	    		@RequestParam(required = false) String q,
 	     
 	            @RequestParam(required = false) String tipo,
 	            @RequestParam(required = false) Long marca,
@@ -60,6 +60,8 @@ public class CatalogoController {
 	    	
 	    	
 	    	ProductoFilterDTO filter = new ProductoFilterDTO();
+	    	
+	    	filter.setNombre(q);
 	        
 	        if (tipo != null && !tipo.isEmpty()) {
 	            try {
@@ -95,6 +97,7 @@ public class CatalogoController {
 	        model.addAttribute("selectedForma", forma);
 	        model.addAttribute("selectedMaterial", material);
 	        
+	        model.addAttribute("q", q);
 	         
 	        String titulo = "Nuestro Catálogo";
 	        if (filter.getTipo() == TipoProducto.MONTURA) titulo = "Lentes Oftálmicos";

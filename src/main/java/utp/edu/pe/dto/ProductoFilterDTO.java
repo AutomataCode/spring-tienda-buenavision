@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 import utp.edu.pe.entity.enums.TipoProducto;
 
 public class ProductoFilterDTO {
-  
+	
+	private String nombre;
+	
     private String genero;
     private Long marcaId;
     private Long categoriaId;
@@ -20,12 +22,17 @@ public class ProductoFilterDTO {
   
     public ProductoFilterDTO() {}
   
-
+    
  
     
-    public ProductoFilterDTO(String genero, Long marcaId, Long categoriaId, Long formaId, Long materialId,
-			BigDecimal minPrecio, BigDecimal maxPrecio, String searchTerm, TipoProducto tipo) {
+
+
+
+
+	public ProductoFilterDTO(String nombre, String genero, Long marcaId, Long categoriaId, Long formaId,
+			Long materialId, BigDecimal minPrecio, BigDecimal maxPrecio, String searchTerm, TipoProducto tipo) {
 		super();
+		this.nombre = nombre;
 		this.genero = genero;
 		this.marcaId = marcaId;
 		this.categoriaId = categoriaId;
@@ -36,6 +43,32 @@ public class ProductoFilterDTO {
 		this.searchTerm = searchTerm;
 		this.tipo = tipo;
 	}
+
+
+
+
+
+
+
+
+	public String getNombre() {
+		return nombre;
+	}
+
+
+
+
+
+
+
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+
+
+
 
 
 

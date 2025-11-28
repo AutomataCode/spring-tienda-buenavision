@@ -55,7 +55,10 @@ public class ProductoSpecification implements Specification<Producto> {
             predicates.add(cb.equal(root.get("material").get("idMaterial"), filter.getMaterialId()));
         }
 
-        
+        if (filter.getNombre() != null && !filter.getNombre().isEmpty()) {
+            // Buscamos ignorando mayúsculas/minúsculas (LIKE %texto%)
+            predicates.add(cb.like(cb.lower(root.get("nombre")), "%" + filter.getNombre().toLowerCase() + "%"));
+        }
         
         return cb.and(predicates.toArray(new Predicate[0]));
 	}
