@@ -1,7 +1,7 @@
 package utp.edu.pe.entity.enums;
 
 public enum Genero {
-	 HOMBRE("Hombre"),
+		HOMBRE("Hombre"),
 	    MUJER("Mujer"),
 	    UNISEX("Unisex"),
 		KIDS("Kids");	

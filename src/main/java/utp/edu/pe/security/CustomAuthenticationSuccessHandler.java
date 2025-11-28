@@ -12,17 +12,33 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import utp.edu.pe.entity.Usuario;
+import utp.edu.pe.repository.UsuarioRepository;
 import utp.edu.pe.service.CustomUserDetailsService;
+import utp.edu.pe.service.UsuarioService;
 
 
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 	@Autowired
 	private CustomUserDetailsService userDetailsService;
+	
+	@Autowired
+    private UsuarioService usuarioService;
+	
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
+		
+		String username = authentication.getName();
+        Usuario usuariox = usuarioRepository.findByUsername(username).orElse(null); // Ajustar según tu repo
+        
+        // Resetear contador a 0
+        if (usuariox != null && usuariox.getIntentosFallidos() > 0) {
+            usuarioService.resetearIntentosFallidos(usuariox);
+        }
 
 		// 1. ACTUALIZAR ÚLTIMO LOGIN
 		// (Esta es la lógica que movimos del LoginSuccessListener)

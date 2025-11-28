@@ -97,7 +97,7 @@ public class CatalogoController {
 	        
 	         
 	        String titulo = "Nuestro Catálogo";
-	        if (filter.getTipo() == TipoProducto.OFTALMICO) titulo = "Lentes Oftálmicos";
+	        if (filter.getTipo() == TipoProducto.MONTURA) titulo = "Lentes Oftálmicos";
 	        if (filter.getTipo() == TipoProducto.SOLAR) titulo = "Lentes de Sol";
 	        model.addAttribute("titulo", titulo);
 	        
@@ -221,65 +221,7 @@ public class CatalogoController {
 	    }
 	    
 
-	    @GetMapping("/lentes-sol")
-	    public String lentesSol(@RequestParam(defaultValue = "0") int page,
-	                           @RequestParam(defaultValue = "12") int size,
-	                           @RequestParam(required = false) String genero,
-	                           Model model) {
-	        
-	        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
-	        Page<Producto> productosPage;
-	        
-	        if (genero != null && !genero.isEmpty()) {
-	            Genero generoEnum = Genero.valueOf(genero.toUpperCase());
-	            productosPage = productoService.findByTipoAndGenero(
-	                TipoProducto.SOLAR, generoEnum, pageable
-	            );
-	        } else {
-	            productosPage = productoService.findByTipo(TipoProducto.SOLAR, pageable);
-	        }
-	        
-	        model.addAttribute("productos", productosPage.getContent());
-	        model.addAttribute("currentPage", page);
-	        model.addAttribute("totalPages", productosPage.getTotalPages());
-	        model.addAttribute("totalItems", productosPage.getTotalElements());
-	        model.addAttribute("categoria", "Lentes de Sol");
-	        model.addAttribute("selectedGenero", genero);
-	        model.addAttribute("tipoProducto", "SOLAR");
-	        
-	        cargarFiltrosDisponibles(model);
-	        return "catalogo/categoria";
-	    }
-
-	    @GetMapping("/lentes-oftalmicos")
-	    public String lentesOftalmicos(@RequestParam(defaultValue = "0") int page,
-	                                  @RequestParam(defaultValue = "12") int size,
-	                                  @RequestParam(required = false) String genero,
-	                                  Model model) {
-	        
-	        Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
-	        Page<Producto> productosPage;
-	        
-	        if (genero != null && !genero.isEmpty()) {
-	            Genero generoEnum = Genero.valueOf(genero.toUpperCase());
-	            productosPage = productoService.findByTipoAndGenero(
-	                TipoProducto.OFTALMICO, generoEnum, pageable
-	            );
-	        } else {
-	            productosPage = productoService.findByTipo(TipoProducto.OFTALMICO, pageable);
-	        }
-	        
-	        model.addAttribute("productos", productosPage.getContent());
-	        model.addAttribute("currentPage", page);
-	        model.addAttribute("totalPages", productosPage.getTotalPages());
-	        model.addAttribute("totalItems", productosPage.getTotalElements());
-	        model.addAttribute("categoria", "Lentes Oftálmicos");
-	        model.addAttribute("selectedGenero", genero);
-	        model.addAttribute("tipoProducto", "OFTALMICO");
-	        
-	        cargarFiltrosDisponibles(model);
-	        return "catalogo/categoria";
-	    }
+	
 
 	    @GetMapping("/hombre")
 	    public String productosHombre(@RequestParam(defaultValue = "0") int page,
@@ -446,10 +388,10 @@ public class CatalogoController {
 	    
 	    private String getTituloPorTipo(TipoProducto tipo) {
 	        return switch (tipo) {
+	            case MONTURA -> "Monturas";
 	            case SOLAR -> "Lentes de Sol";
-	            case OFTALMICO -> "Lentes Oftálmicos";
-	            case LENTESCONTACTO -> "Lentes de Conctacto";
-	            case ACCESORIOS -> "Accesorios";
+	            case LENTE_CONTACTO -> "Lentes de Contacto";
+	            case ACCESORIO -> "Accesorios";
 	        };
 	    }
 	    

@@ -2,6 +2,7 @@ package utp.edu.pe.entity;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -54,7 +55,16 @@ public class Usuario implements UserDetails {
 
 	    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
 	    private Cliente cliente;
+	    
+	    @Column(name = "intentos_fallidos")
+	    private Integer intentosFallidos = 0; 
 
+	    // CAMBIO 2: De 'boolean' a 'Boolean'
+	    @Column(name = "cuenta_bloqueada")
+	    private Boolean cuentaBloqueada = false; 
+
+	    @Column(name = "fecha_bloqueo")
+	    private Date fechaBloqueo;
  
 	    public Usuario() {
 	        super();
@@ -80,6 +90,26 @@ public class Usuario implements UserDetails {
 			this.tokenExpira = tokenExpira;
 			this.cliente = cliente;
 		}
+	    
+	    public Integer getIntentosFallidos() { // Cambiado a Integer
+	        // Evitamos NullPointerException devolviendo 0 si es nulo
+	        return intentosFallidos == null ? 0 : intentosFallidos; 
+	    }
+
+	    public void setIntentosFallidos(Integer intentosFallidos) { 
+	        this.intentosFallidos = intentosFallidos; 
+	    }
+
+	    public Boolean isCuentaBloqueada() { // Cambiado a Boolean
+	        // Si es nulo, asumimos que es false (no bloqueado)
+	        return cuentaBloqueada == null ? false : cuentaBloqueada; 
+	    }
+
+	    public void setCuentaBloqueada(Boolean cuentaBloqueada) { 
+	        this.cuentaBloqueada = cuentaBloqueada; 
+	    }
+	    public Date getFechaBloqueo() { return fechaBloqueo; }
+	    public void setFechaBloqueo(Date fechaBloqueo) { this.fechaBloqueo = fechaBloqueo; }
 
 
 
@@ -122,7 +152,8 @@ public class Usuario implements UserDetails {
 
 	    @Override
 	    public boolean isAccountNonLocked() {
-	        return true; //  manejar lógica de bloqueo
+	    	// Spring Security checará esto antes de permitir el login
+	    	return !isCuentaBloqueada();
 	    }
 
 	    @Override

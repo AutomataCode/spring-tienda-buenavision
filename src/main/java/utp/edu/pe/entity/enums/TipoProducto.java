@@ -1,10 +1,11 @@
 package utp.edu.pe.entity.enums;
 
 public enum TipoProducto {
-    OFTALMICO("Lentes Oftálmicos"),
-    SOLAR("Lentes Sol"),
-	LENTESCONTACTO("Lentes de contacto"),
-	ACCESORIOS("Accesorios");
+    MONTURA("MONTURA"),
+    SOLAR("LENTES DE SOL"),
+    LENTE_CONTACTO("LENTE DE CONTACTO"),
+    ACCESORIO("ACCESORIO");
+	
     private final String descripcion;
     
     TipoProducto(String descripcion) {

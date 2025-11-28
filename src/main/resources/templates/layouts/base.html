@@ -82,7 +82,10 @@
 
 	<th:block th:insert="${additionalStyles} ?: ~{}" />
 
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
+	</head>
 
 </head>
 
@@ -221,23 +224,28 @@
 	     }
 
 	    // ----- FUNCIÓN CORE AJAX -----
-	    async function ejecutarAccionCarrito(url, method, body = null, inputElement = null) {
-	        if (isCartActionRunning) {
-	            console.warn("Acción de carrito ya en progreso...");
-	            mostrarNotificacion("Espera un momento...", "info");
-	            return;
-	        }
-	        isCartActionRunning = true;
-	        console.log(`Ejecutando ${method} en ${url}`);
-	        // Opcional: Mostrar un loader general
-	        // showGlobalLoader();
+		async function ejecutarAccionCarrito(url, method, body = null, inputElement = null) {
+		        if (isCartActionRunning) {
+		            console.warn("Acción de carrito ya en progreso...");
+		            mostrarNotificacion("Espera un momento...", "info");
+		            return;
+		        }
+		        isCartActionRunning = true;
+		        console.log(`Ejecutando ${method} en ${url}`);
 
-	        try {
-	            const fetchOptions = {
-	                method: method,
-	                headers: {'X-Requested-With': 'XMLHttpRequest'},
-	                body: body
-	            };
+		        try {
+		            // 1. OBTENER EL TOKEN CSRF DE LAS META ETIQUETAS
+		            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+		            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+		            const fetchOptions = {
+		                method: method,
+		                headers: {
+		                    'X-Requested-With': 'XMLHttpRequest',
+		                    [csrfHeader]: csrfToken // <--- 2. AGREGAR EL TOKEN AQUI
+		                },
+		                body: body
+		            };
 
 	            const response = await fetch(url, fetchOptions);
 	            const data = await response.json();

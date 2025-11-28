@@ -98,6 +98,12 @@
 										<li sec:authorize="hasAuthority('ROLE_ADMIN')">
 										        <a class="dropdown-item" th:href="@{/admin/pedidos}">Gestión de Pedidos</a>
 										    </li>
+											
+											<li sec:authorize="hasAuthority('ROLE_ADMIN')">
+											    <a class="dropdown-item" th:href="@{/admin/dashboard}">
+											        <i class="fas fa-chart-line me-2"></i>Dashboard
+											    </a>
+											</li>
 						        <li><hr class="dropdown-divider"></li>
 						        <li>
 						            <form th:action="@{/logout}" method="post" class="d-inline w-100">

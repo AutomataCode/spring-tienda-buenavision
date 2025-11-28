@@ -1,5 +1,6 @@
 package utp.edu.pe.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.security.config.Customizer;
 
 import utp.edu.pe.service.CustomUserDetailsService; 
 
@@ -31,13 +32,11 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
         this.successHandler = successHandler;
     }
+    
+    @Autowired
+    private CustomLoginFailureHandler failureHandler;
 
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
+ 
 
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
@@ -59,20 +58,46 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authz -> authz
-            	.requestMatchers("/public/**","/catalogo/**","/carrito/**", "/css/**", "/js/**", "/img/**","/webfonts/**", "/login", "/registro").permitAll()
+        	.authorizeHttpRequests(authz -> authz
+                // AGREGA "/error" A ESTA LISTA
+            	.requestMatchers("/public/**","/catalogo/**","/carrito/**", "/css/**", "/js/**", "/img/**","/webfonts/**", "/login", "/registro", "/error").permitAll()
             	.requestMatchers("/pedido/**").hasAuthority("ROLE_CLIENTE")
             	.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
             )
+            
+            .headers(headers -> headers
+                
+            		// 1. Política de Contenido (CSP) - 
+                    .contentSecurityPolicy(csp -> csp
+                        .policyDirectives("default-src 'self'; " +
+                        				  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+                                          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                                          "font-src 'self' https://fonts.gstatic.com; " +
+                                          "img-src 'self' data: https:; " +                    
+                                          "connect-src 'self' https://cdn.jsdelivr.net; " +     // Para llamadas AJAX
+                                          "object-src 'none'; " +       // Bloquea plugins/Flash (Recomendado)
+                                          "base-uri 'self'; " +         // SOLUCIÓN ALERTA ZAP
+                                          "form-action 'self'; " +      // SOLUCIÓN ALERTA ZAP
+                                          "frame-ancestors 'none';")    // Refuerza el bloqueo de iframes
+                    )
+                    // 2. Anti-Clickjacking (X-Frame-Options)
+                    .frameOptions(frame -> frame
+                        .deny()
+                    )
+                    // 3. Protección MIME (CORREGIDO)
+                    // Usamos withDefaults() porque 'nosniff' ya es el valor predeterminado
+                    .contentTypeOptions(Customizer.withDefaults()) 
+                )
+            
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .authenticationProvider(authenticationProvider)
             .formLogin(form -> form
                     .loginPage("/login")
-                    .successHandler(successHandler) // 
+                    .successHandler(successHandler)
+                    .failureHandler(failureHandler)// 
                     .permitAll()
                 )
                 .logout(logout -> logout

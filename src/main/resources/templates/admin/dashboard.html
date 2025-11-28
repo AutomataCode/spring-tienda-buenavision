@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::body}, ~{::#dashStyles}, ~{::#dashScripts})}">
+<head>
+    <title>Dashboard Administrativo</title>
+    <th:block id="dashStyles">
+        </th:block>
+</head>
+<body>
+
+<section class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2">Dashboard General</h1>
+            <p class="text-muted">Resumen de actividad de la tienda</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-money-bill-wave"></i> Ingresos Hoy</h5>
+                    <p class="card-text display-6 fw-bold" th:text="|S/ ${#numbers.formatDecimal(ingresosHoy, 1, 2)}|">S/ 0.00</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-dark"><i class="fas fa-clock"></i> Pedidos Pendientes</h5>
+                    <p class="card-text display-6 fw-bold text-dark" th:text="${pedidosPendientes}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-exclamation-triangle"></i> Productos sin Stock</h5>
+                    <p class="card-text display-6 fw-bold" th:text="${productosBajoStock}">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Ventas: Últimos 7 Días</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartVentasDias"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Top 5 Productos</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTopProductos"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Ventas Mensuales (Año Actual)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartVentasMes"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<th:block id="dashScripts">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        
+        // 1. Datos desde Thymeleaf
+        const diasLabels = /*[[${diasLabels}]]*/ [];
+        const diasData = /*[[${diasData}]]*/ [];
+        
+        const mesLabels = /*[[${mesLabels}]]*/ [];
+        const mesData = /*[[${mesData}]]*/ [];
+        
+        const prodLabels = /*[[${prodLabels}]]*/ [];
+        const prodData = /*[[${prodData}]]*/ [];
+
+        // 2. Gráfico de Ventas Diarias (Line Chart)
+        const ctxDias = document.getElementById('chartVentasDias').getContext('2d');
+        new Chart(ctxDias, {
+            type: 'line',
+            data: {
+                labels: diasLabels,
+                datasets: [{
+                    label: 'Ventas (S/)',
+                    data: diasData,
+                    borderColor: '#28a745', // Verde Success
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // 3. Gráfico de Top Productos (Doughnut)
+        const ctxProd = document.getElementById('chartTopProductos').getContext('2d');
+        new Chart(ctxProd, {
+            type: 'doughnut',
+            data: {
+                labels: prodLabels,
+                datasets: [{
+                    data: prodData,
+                    backgroundColor: [
+                        '#007bff', '#6610f2', '#6f42c1', '#e83e8c', '#fd7e14'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // 4. Gráfico Mensual (Bar Chart)
+        const ctxMes = document.getElementById('chartVentasMes').getContext('2d');
+        new Chart(ctxMes, {
+            type: 'bar',
+            data: {
+                labels: mesLabels,
+                datasets: [{
+                    label: 'Total Vendido (S/)',
+                    data: mesData,
+                    backgroundColor: '#17a2b8',
+                    borderColor: '#117a8b',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        /*]]>*/
+    </script>
+</th:block>
+
+</body>
+</html>

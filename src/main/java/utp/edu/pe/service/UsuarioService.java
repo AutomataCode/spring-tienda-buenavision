@@ -29,5 +29,10 @@ public interface UsuarioService {
     
     Usuario registrarCliente(RegistroClienteDTO dto);
     
+    
+    void aumentarIntentosFallidos(Usuario usuario);
+    void resetearIntentosFallidos(Usuario usuario);
+    void bloquear(Usuario usuario);
+    
 
 }

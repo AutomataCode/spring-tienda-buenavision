@@ -1,5 +1,6 @@
 package utp.edu.pe.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,8 @@ public class UsuarioServiceImpl implements UsuarioService{
 	
 	private final ClienteRepository clienteRepository; 
     private final PasswordEncoder passwordEncoder;
+    
+    public static final int MAX_INTENTOS_FALLIDOS = 3;
 	
     @Autowired
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository,ClienteRepository clienteRepository, 
@@ -131,6 +134,28 @@ public class UsuarioServiceImpl implements UsuarioService{
         // al guardar el 'usuario', JPA también guardará automáticamente el 'cliente'
         // y manejará la asignación de la clave foránea.
         return usuarioRepository.save(usuario);
+	}
+	@Override
+	public void aumentarIntentosFallidos(Usuario usuario) {
+		int nuevosIntentos = usuario.getIntentosFallidos() + 1;
+        usuario.setIntentosFallidos(nuevosIntentos);
+        usuarioRepository.save(usuario);
+		
+	}
+	@Override
+	public void resetearIntentosFallidos(Usuario usuario) {
+		usuario.setIntentosFallidos(0);
+        usuario.setCuentaBloqueada(false);
+        usuario.setFechaBloqueo(null);
+        usuarioRepository.save(usuario);
+		
+	}
+	@Override
+	public void bloquear(Usuario usuario) {
+		usuario.setCuentaBloqueada(true);
+        usuario.setFechaBloqueo(new Date());
+        usuarioRepository.save(usuario);
+		
 	}
 }
 
