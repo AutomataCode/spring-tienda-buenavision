@@ -27,11 +27,11 @@ public class AdminDashboardController {
     @GetMapping
     public String verDashboard(Model model) {
         
-        // 1. Cargar KPIs (Tarjetas Superiores)
+        // Cargar KPIs (Tarjetas Superiores)
         Map<String, Object> kpis = dashboardService.obtenerResumenKpis();
         model.addAllAttributes(kpis);
 
-        // 2. Preparar datos para Gráfico de Ventas (Últimos 7 días)
+        // Preparar datos para Gráfico de Ventas (Últimos 7 días)
         List<VentaPeriodoDTO> ventasDias = dashboardService.getVentasUltimos7Dias();
         List<String> diasLabels = new ArrayList<>();
         List<Double> diasData = new ArrayList<>();
@@ -42,7 +42,7 @@ public class AdminDashboardController {
         model.addAttribute("diasLabels", diasLabels);
         model.addAttribute("diasData", diasData);
 
-        // 3. Preparar datos para Gráfico de Ventas (Mensual)
+        // Preparar datos para Gráfico de Ventas (Mensual)
         List<VentaPeriodoDTO> ventasMes = dashboardService.getVentasPorMes();
         List<String> mesLabels = new ArrayList<>();
         List<Double> mesData = new ArrayList<>();
@@ -53,7 +53,7 @@ public class AdminDashboardController {
         model.addAttribute("mesLabels", mesLabels);
         model.addAttribute("mesData", mesData);
 
-        // 4. Preparar datos para Top Productos
+        //  Preparar datos para Top Productos
         List<ProductoTopDTO> topProds = dashboardService.getTopProductos();
         List<String> prodLabels = new ArrayList<>();
         List<Integer> prodData = new ArrayList<>();
@@ -64,6 +64,6 @@ public class AdminDashboardController {
         model.addAttribute("prodLabels", prodLabels);
         model.addAttribute("prodData", prodData);
 
-        return "admin/dashboard"; // Nueva vista
+        return "admin/dashboard";
     }
 }

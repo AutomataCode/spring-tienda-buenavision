@@ -40,12 +40,12 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             usuarioService.resetearIntentosFallidos(usuariox);
         }
 
-		// 1. ACTUALIZAR ÚLTIMO LOGIN
+		//  ACTUALIZAR ÚLTIMO LOGIN
 		// (Esta es la lógica que movimos del LoginSuccessListener)
 		Usuario usuario = (Usuario) authentication.getPrincipal();
 		userDetailsService.actualizarUltimoLogin(usuario.getIdUsuario());
 
-		// 2. LÓGICA DE REDIRECCIÓN POR ROL
+		//  LÓGICA DE REDIRECCIÓN POR ROL
 		String targetUrl = determineTargetUrl(authentication);
 
 		if (response.isCommitted()) {

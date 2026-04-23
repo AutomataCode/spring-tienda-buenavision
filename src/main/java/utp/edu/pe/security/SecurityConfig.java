@@ -59,7 +59,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider) throws Exception {
         http
         	.authorizeHttpRequests(authz -> authz
-                // AGREGA "/error" A ESTA LISTA
+               
             	.requestMatchers("/public/**","/catalogo/**","/carrito/**", "/css/**", "/js/**", "/img/**","/webfonts/**", "/login", "/registro", "/error").permitAll()
             	.requestMatchers("/pedido/**").hasAuthority("ROLE_CLIENTE")
             	.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
@@ -68,7 +68,7 @@ public class SecurityConfig {
             
             .headers(headers -> headers
                 
-            		// 1. Política de Contenido (CSP) - 
+            		//  Política de Contenido (CSP) - 
                     .contentSecurityPolicy(csp -> csp
                         .policyDirectives("default-src 'self'; " +
                         				  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
@@ -81,11 +81,11 @@ public class SecurityConfig {
                                           "form-action 'self'; " +      // SOLUCIÓN ALERTA ZAP
                                           "frame-ancestors 'none';")    // Refuerza el bloqueo de iframes
                     )
-                    // 2. Anti-Clickjacking (X-Frame-Options)
+                    //  Anti-Clickjacking (X-Frame-Options)
                     .frameOptions(frame -> frame
                         .deny()
                     )
-                    // 3. Protección MIME (CORREGIDO)
+                    //  
                     // Usamos withDefaults() porque 'nosniff' ya es el valor predeterminado
                     .contentTypeOptions(Customizer.withDefaults()) 
                 )
